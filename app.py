@@ -2,23 +2,176 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import translations as tr
 
 # ==========================================
-# 0. PAGE CONFIG (Mobile Optimization)
+# 0. PAGE CONFIG & LANGUAGE INIT
 # ==========================================
 st.set_page_config(page_title="Quebec PSTQ Calc", layout="wide", initial_sidebar_state="expanded")
 
-# Custom CSS to fix mobile padding
+# Initialize Language Session State
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'en'
+
+# --- HELPER FUNCTIONS ---
+def t(key):
+    """Fetch text based on current language"""
+    return tr.TEXTS[st.session_state.lang].get(key, key)
+
+def get_label(category_map, key):
+    return category_map.get(key, {}).get(st.session_state.lang, key)
+
+def get_key_from_label(category_map, label):
+    for key, langs in category_map.items():
+        if langs.get(st.session_state.lang) == label:
+            return key
+    return label
+
+# --- CSS ---
 st.markdown("""
     <style>
     .block-container {padding-top: 1rem; padding-bottom: 1rem;}
     div[data-testid="stExpander"] div[role="button"] p {font-size: 1.1rem; font-weight: bold;}
+
+    /* COMPACT TARGET BOX */
+    .target-score-box {
+        background-color: #f0fdf4;
+        border: 1px solid #16a34a;
+        color: #14532d;            /* Dark Green Text */
+        padding: 15px;         /* 5px Top/Bottom, 10px Left/Right */
+        border-radius: 6px;
+        text-align: center;
+        line-height: 1.1;          /* Tighter lines */
+        font-size: 0.9rem;         /* Base font smaller */
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 1. SCORING ENGINE (Your Logic - Unchanged)
+# 1. SIDEBAR (WITH CALLBACK FIX)
 # ==========================================
+with st.sidebar:
+    # --- CALLBACK FUNCTION ---
+    # This function runs immediately when the user clicks the button,
+    # BEFORE the rest of the app reloads.
+    def update_language():
+        if st.session_state.lang_choice == "Français":
+            st.session_state.lang = 'fr'
+        else:
+            st.session_state.lang = 'en'
+
+    # Determine current index for the widget
+    curr_index = 0 if st.session_state.lang == 'en' else 1
+
+    # --- LANGUAGE WIDGET ---
+    st.radio(
+        label=t("lang_select"),
+        options=["English", "Français"],
+        index=curr_index,
+        horizontal=True,
+        key="lang_choice",       # We give it a key to access it in the callback
+        on_change=update_language # <--- THIS IS THE FIX
+    )
+
+    st.divider()
+
+    # --- REST OF SIDEBAR ---
+    st.header(t("sb_title"))
+
+    with st.expander(t("sec_applicant"), expanded=True):
+        # Age
+        p_age = st.slider(t("age"), 18, 50, 35)
+
+
+        # General Experience
+        p_gen_exp = st.slider(t("exp"), 0, 60, 36)
+
+        # Education
+        edu_display_opts = [get_label(tr.EDU_MAP, k) for k in tr.EDU_MAP.keys()]
+        # We need to be careful with index matching when language switches
+        # Default to Tech Diploma (index 4) if possible
+        p_edu_label = st.selectbox(t("edu"), options=edu_display_opts, index=4)
+        p_edu = get_key_from_label(tr.EDU_MAP, p_edu_label)
+
+        st.caption(t("fr_skills"))
+        c1, c2 = st.columns(2)
+        p_fr_l = c1.number_input(t("list"), 0, 12, 5)
+        p_fr_s = c2.number_input(t("speak"), 0, 12, 7)
+        p_fr_r = c1.number_input(t("read"), 0, 12, 5)
+        p_fr_w = c2.number_input(t("write"), 0, 12, 0)
+
+    with st.expander(t("sec_job"), expanded=False):
+        # Diagnosis
+        diag_keys = ['None', 'Slight', 'Deficit']
+        diag_display = [get_label(tr.DIAG_MAP, k) for k in diag_keys]
+        p_diag_label = st.selectbox(t("job_diag"), diag_display, index=0)
+        p_diag = get_key_from_label(tr.DIAG_MAP, p_diag_label)
+
+        p_prim_occ = st.slider(t("job_prim_exp"), 0, 60, 12)
+        p_qc_exp = st.slider(t("job_qc_exp"), 0, 60, 12)
+
+        # VJO
+        vjo_keys = ['None', 'Inside Montreal', 'Outside Montreal']
+        vjo_display = [get_label(tr.VJO_MAP, k) for k in vjo_keys]
+        p_vjo_label = st.radio(t("vjo"), vjo_display, index=2)
+        p_vjo = get_key_from_label(tr.VJO_MAP, p_vjo_label)
+
+        p_auth = st.checkbox(t("auth"))
+
+        # QC Diploma
+        qc_keys = ['None', 'PhD', 'Masters', 'Bachelors 3y+', 'Bachelors 2y', 'Tech Diploma 3y', 'Vocational (DEP)']
+        qc_dip_display = [get_label(tr.QC_DIP_MAP, k) for k in qc_keys]
+        p_qc_dip_label = st.selectbox(t("qc_dip"), qc_dip_display, index=0)
+        p_qc_dip = get_key_from_label(tr.QC_DIP_MAP, p_qc_dip_label)
+
+        st.caption(t("reg_ties"))
+        p_out_res = st.slider(t("reg_res"), 0, 60, 36)
+        p_out_work = st.slider(t("reg_work"), 0, 60, 12)
+        p_out_study = st.slider(t("reg_study"), 0, 60, 0)
+
+    with st.expander(t("sec_spouse"), expanded=False):
+        p_spouse = st.checkbox(t("sp_check"), value=True)
+
+        if p_spouse:
+            col1, col2 = st.columns(2)
+            sp_age = col1.slider(t("sp_age"), 18, 50, 35)
+
+            # Spouse Edu
+            # Use keys from map to ensure order
+            sp_keys = ['PhD', 'Masters', 'Bachelors', 'Tech Diploma', 'High School', 'None']
+            sp_edu_display = [get_label(tr.EDU_MAP, k) for k in sp_keys]
+            sp_edu_label = col2.selectbox(t("sp_edu"), sp_edu_display, index=1)
+            sp_edu = get_key_from_label(tr.EDU_MAP, sp_edu_label)
+
+            sp_qc_exp = st.slider(t("sp_qc_exp"), 0, 60, 12)
+
+            st.caption(t("sp_fr"))
+            c1, c2 = st.columns(2)
+            sp_l = c1.number_input(t("list"), 0, 12, 0, key="spl")
+            sp_s = c2.number_input(t("speak"), 0, 12, 7, key="sps")
+            sp_r = c1.number_input(t("read"), 0, 12, 0, key="spr")
+            sp_w = c2.number_input(t("write"), 0, 12, 0, key="spw")
+        else:
+            sp_age, sp_edu, sp_qc_exp = 0, 'None', 0
+            sp_l, sp_s, sp_r, sp_w = 0,0,0,0
+
+        p_family = st.checkbox(t("fam_check"))
+
+# ==========================================
+# 2. MAIN TITLE (Renders instantly correct now)
+# ==========================================
+st.title(t("app_title"))
+
+# ==========================================
+# 3. DATA & CONSTANTS
+# ==========================================
+
+LATEST_DRAWS = [
+    {"Date": "2025-08-25", "Stream": "Stream 1 (Highly qualified and specialized skills)", "Score": 768, "Invited": 216},
+    {"Date": "2025-08-14", "Stream": "Stream 3 (Regulated professions)", "Score": 766, "Invited": 275},
+    {"Date": "2025-07-31", "Stream": "Stream 2 (Intermediate and manual skills)", "Score": 661, "Invited": 273},
+    {"Date": "2025-07-28", "Stream": "Stream 1 (Highly qualified and specialized skills)", "Score": 760, "Invited": 227},
+]
 
 DIAG_MATRIX = {
     "None": [(0, 12, 0), (12, 24, 5), (24, 36, 10), (36, 48, 15), (48, 10**9, 25)],
@@ -49,7 +202,6 @@ def band_points(months, bands):
     return 0
 
 def calculate_score_v10(p):
-    # [YOUR EXISTING CALCULATION LOGIC - COPIED VERBATIM FOR STABILITY]
     audit = {}
     spouse = p['spouse']
 
@@ -143,69 +295,7 @@ def calculate_score_v10(p):
 
     return final_hc + final_qn + final_ad, audit
 
-# ==========================================
-# 2. RESPONSIVE UI
-# ==========================================
-st.title("🍁 Quebec PSTQ Simulator")
-st.markdown("Interactive score calculator for the *Regular Skilled Worker Program*.")
-
-# We use a Sidebar for inputs to keep the main view clean for mobile
-with st.sidebar:
-    st.header("1. Profile Setup")
-
-    # APPLICANT SECTION
-    with st.expander("👤 Applicant (You)", expanded=True):
-        col1, col2 = st.columns(2)
-        p_age = col1.slider("Age", 18, 50, 35)
-        p_edu = col2.selectbox("Education", options=EDU_POINTS_UI.keys(), index=4) # Tech Dip default
-        p_gen_exp = st.slider("Total Career Exp (Months)", 0, 60, 36)
-
-        st.caption("French Skills (Level 1-12)")
-        c1, c2 = st.columns(2)
-        p_fr_l = c1.number_input("Listening", 0, 12, 5)
-        p_fr_s = c2.number_input("Speaking", 0, 12, 7)
-        p_fr_r = c1.number_input("Reading", 0, 12, 5)
-        p_fr_w = c2.number_input("Writing", 0, 12, 0)
-
-    # JOB & TIES SECTION
-    with st.expander("💼 Job & Quebec Ties", expanded=False):
-        p_diag = st.selectbox("Job Shortage Status", ['None', 'Slight', 'Deficit'], index=0)
-        p_prim_occ = st.slider("Exp. in Shortage Job (Months)", 0, 60, 12)
-        p_qc_exp = st.slider("Quebec Work History (Months)", 0, 60, 12)
-
-        p_vjo = st.radio("Validated Job Offer", ['None', 'Inside Montreal', 'Outside Montreal'], index=2)
-        p_auth = st.checkbox("Professional License (Regulated Job)")
-        p_qc_dip = st.selectbox("Quebec Diploma", options=QC_DIPLOMA_POINTS.keys(), index=0)
-
-        st.caption("Regional Ties (Outside Montreal)")
-        p_out_res = st.slider("Months Residing", 0, 60, 36)
-        p_out_work = st.slider("Months Working", 0, 60, 12)
-        p_out_study = st.slider("Months Studying", 0, 60, 0)
-
-    # SPOUSE SECTION
-    with st.expander("❤️ Spouse / Partner", expanded=False):
-        p_spouse = st.checkbox("Accompanied by Spouse", value=True)
-
-        if p_spouse:
-            col1, col2 = st.columns(2)
-            sp_age = col1.slider("Spouse Age", 18, 50, 35)
-            sp_edu = col2.selectbox("Spouse Edu", options=EDU_SPOUSE_UI.keys(), index=1)
-            sp_qc_exp = st.slider("Spouse QC Work (Months)", 0, 60, 12)
-
-            st.caption("Spouse French")
-            c1, c2 = st.columns(2)
-            sp_l = c1.number_input("Sp. Listen", 0, 12, 0)
-            sp_s = c2.number_input("Sp. Speak", 0, 12, 7)
-            sp_r = c1.number_input("Sp. Read", 0, 12, 0)
-            sp_w = c2.number_input("Sp. Write", 0, 12, 0)
-        else:
-            # Defaults if no spouse
-            sp_age, sp_edu, sp_qc_exp = 0, 'None', 0
-            sp_l, sp_s, sp_r, sp_w = 0,0,0,0
-
-        p_family = st.checkbox("Family in QC")
-
-# --- GATHER DATA ---
+# Gather data
 p = {
     'age': p_age, 'edu': p_edu, 'gen_exp': p_gen_exp,
     'fr_l': p_fr_l, 'fr_s': p_fr_s, 'fr_r': p_fr_r, 'fr_w': p_fr_w,
@@ -220,91 +310,102 @@ p = {
 total, audit = calculate_score_v10(p)
 
 # ==========================================
-# 3. MAIN DISPLAY (Desktop & Mobile Friendly)
+# 4. MAIN TABS
 # ==========================================
 
-# SCOREBOARD
-col1, col2, col3 = st.columns(3)
-col1.metric("Human Capital", f"{audit['total_hc']} / 520")
-col2.metric("Quebec Needs", f"{audit['total_qn']} / 700")
-col3.metric("Adaptation", f"{audit['total_ad']} / 180")
+tab_dash, tab_sim, tab_draws = st.tabs([t("tab_dash"), t("tab_sim"), t("tab_draws")])
 
-st.divider()
+# --- TAB 1: DASHBOARD ---
+with tab_dash:
+    col1, col2, col3 = st.columns(3)
+    col1.metric(t("hc"), f"{audit['total_hc']} / 520")
+    col2.metric(t("qn"), f"{audit['total_qn']} / 700")
+    col3.metric(t("ad"), f"{audit['total_ad']} / 180")
 
-# BIG TOTAL
-pass_mark = 590 if not p_spouse else 620 # Approx cutoffs for visual context
-color = "green" if total >= 600 else "red" # Simplified visual check
+    st.divider()
 
-st.markdown(f"""
-    <div style="text-align: center; padding: 20px; background-color: {'#e6fffa' if total >= 600 else '#fff5f5'}; border-radius: 10px; margin-bottom: 20px;">
-        <h4 style="margin:0; color: #555;">TOTAL SCORE</h4>
-        <h1 style="margin:0; font-size: 3.5rem; color: {color};">{total}</h1>
-        <p style="margin:0;">(Targeting ~600+)</p>
-    </div>
-""", unsafe_allow_html=True)
+    color = "green" if total >= 590 else "#d9534f"
+    st.markdown(f"""
+        <div style="text-align: center; padding: 20px; background-color: {'#e6fffa' if total >= 590 else '#fff5f5'}; border-radius: 10px; margin-bottom: 20px;">
+            <h4 style="margin:0; color: #555;">{t('total_score')}</h4>
+            <h1 style="margin:0; font-size: 4rem; color: {color};">{total}</h1>
+            <p style="margin:0; color: #666;">{t('passing_bench')}</p>
+        </div>
+    """, unsafe_allow_html=True)
 
-# DETAILS TAB
-tab1, tab2 = st.tabs(["📊 Breakdown", "🔮 Future Simulator"])
+    with st.expander(t("breakdown")):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.write(f"{t('age')}: {audit['hc_age']}")
+            st.write(f"{t('edu')}: {audit['hc_edu']}")
+            st.write(f"Fr: {audit['hc_french']}")
+            st.write(f"Exp: {audit['hc_exp']}")
+        with c2:
+            st.write(f"{t('shortage')}: {audit['qn_diag']}")
+            st.write(f"QC Exp: {audit['qn_qc_exp']}")
+            st.write(f"VJO: {audit['qn_vjo']}")
+            st.write(f"Reg: {audit['qn_out']}")
+        with c3:
+            st.write(f"Sp Fr: {audit.get('ad_fr', 0)}")
+            st.write(f"Sp Age: {audit.get('ad_age', 0)}")
+            st.write(f"Sp QC: {audit.get('ad_exp', 0)}")
 
-with tab1:
-    st.write("### Detailed Audit")
-    # Convert audit dict to clean table rows
-    rows = []
-    for k, v in audit.items():
-        if isinstance(v, dict): continue # Skip sub-dicts if any
-        if "total" in k: continue
-        rows.append(f"| {k.replace('_', ' ').upper()} | {v} |")
+# --- TAB 3: LATEST DRAWS ---
+with tab_draws:
+    st.write(f"### {t('draws_title')}")
+    st.write(t('draws_sub'))
 
-    # Just showing simple breakdown for mobile readability
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown("**Human Capital**")
-        st.write(f"Age: {audit['hc_age']}")
-        st.write(f"Edu: {audit['hc_edu']}")
-        st.write(f"French: {audit['hc_french']}")
-        st.write(f"Exp: {audit['hc_exp']}")
-    with c2:
-        st.markdown("**Quebec Needs**")
-        st.write(f"Shortage: {audit['qn_diag']}")
-        st.write(f"QC Exp: {audit['qn_qc_exp']}")
-        st.write(f"VJO: {audit['qn_vjo']}")
-        st.write(f"Regions: {audit['qn_out']}")
-    with c3:
-        st.markdown("**Adaptation**")
-        st.write(f"Spouse Fr: {audit.get('ad_fr', 0)}")
-        st.write(f"Spouse Age: {audit.get('ad_age', 0)}")
-        st.write(f"Spouse QC: {audit.get('ad_exp', 0)}")
+    draws_df = pd.DataFrame(LATEST_DRAWS)
+    st.dataframe(draws_df, width='stretch', hide_index=True)
 
-with tab2:
-    st.write("### 🚀 Strategy Simulator")
-    st.caption("See how your score changes based on two variables.")
+    st.info(t('tip'))
+
+# --- TAB 2: SIMULATOR ---
+with tab_sim:
+    st.write(f"### {t('sim_title')}")
+
+    st.markdown(f"#### {t('step1')}")
+    draw_options = [t("manual")] + [f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" for d in LATEST_DRAWS]
+
+    c_sel, c_score = st.columns([3, 1])
+    target_selection = c_sel.selectbox(t("select_draw"), draw_options, index=0)
+
+    target_score = 600
+    if target_selection == t("manual"):
+        target_score = c_score.number_input("Target Score", 500, 900, 600)
+    else:
+        for d in LATEST_DRAWS:
+            if f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" == target_selection:
+                target_score = d['Score']
+                break
+        c_score.markdown(f"<div class='target-score-box'>Target<br><b style='font-size:20px'>{target_score}</b></div>", unsafe_allow_html=True)
+
+    st.divider()
+
+    st.markdown(f"#### {t('step2')}")
+
+    # MAPPED INPUT: Simulator Axis Labels
+    axis_display_opts = list(tr.AXIS_MAP_LABELS.keys())
+    axis_display_labels = [tr.AXIS_MAP_LABELS[k][st.session_state.lang] for k in axis_display_opts]
 
     col_x, col_y = st.columns(2)
+    x_label_sel = col_x.selectbox(t("x_axis"), axis_display_labels, index=0)
+    y_label_sel = col_y.selectbox(t("y_axis"), axis_display_labels, index=1)
 
-    # Simulator Inputs
-    x_axis = col_x.selectbox("X-Axis (Bottom)", [('Future Months', 'time_travel'), ('French Skills', 'fr_target')], index=0)
-    y_axis = col_y.selectbox("Y-Axis (Left)", [('Future Months', 'time_travel'), ('Spouse French', 'sp_fr_target')], index=1)
+    x_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == x_label_sel)
+    y_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == y_label_sel)
 
-    x_key, y_key = x_axis[1], y_axis[1]
-
-    # Define Ranges (You can adjust these step values)
     def get_range(k):
-        if k == 'time_travel': return [0, 6, 12, 18, 24, 36] # Added 18 months
-        if 'fr' in k: return [4, 5, 6, 7, 8, 9, 10] # Standard TEF levels
+        if k == 'time_travel': return [0, 12, 24, 36, 48, 60]
+        if 'fr' in k: return [5, 6, 7, 8, 9, 10, 12]
         return []
 
-    x_vals = get_range(x_key)
-    y_vals = get_range(y_key)
-
-    # Calculate Matrix
-    # We use a list of dicts to create a Pandas DataFrame (better for Plotly)
+    x_vals, y_vals = get_range(x_key), get_range(y_key)
     results = []
 
     for y in y_vals:
         for x in x_vals:
             sim = p.copy()
-
-            # --- Apply Simulation Logic ---
             def apply_sim(key, val):
                 if key == 'time_travel':
                     sim['qc_exp'] += val
@@ -317,46 +418,52 @@ with tab2:
                     sim['fr_l'] = sim['fr_s'] = sim['fr_r'] = sim['fr_w'] = val
                 elif key == 'sp_fr_target':
                     sim['sp_fr_l'] = sim['sp_fr_s'] = sim['sp_fr_r'] = sim['sp_fr_w'] = val
-
             apply_sim(x_key, x)
             apply_sim(y_key, y)
-
             s, _ = calculate_score_v10(sim)
+            results.append({"x_data": x, "y_data": y, "Score": s})
 
-            # Store result
-            results.append({
-                x_axis[0]: x,
-                y_axis[0]: y,
-                "Score": s
-            })
-
-    # Create DataFrame
     df = pd.DataFrame(results)
+    pivot_df = df.pivot(index="y_data", columns="x_data", values="Score")
+    pivot_df = pivot_df.sort_index(ascending=True)
 
-    # Pivot data for Heatmap format
-    pivot_df = df.pivot(index=y_axis[0], columns=x_axis[0], values="Score")
+    text_df = pivot_df.astype(str)
 
-    # Sort index descending for Y axis so it reads top-to-bottom correctly
-    pivot_df = pivot_df.sort_index(ascending=False)
+    # --- FIXED COLOR RANGE ---
+    # We want a min/max dynamic range for better color sensitivity
+    min_score = pivot_df.min().min()
+    max_score = pivot_df.max().max()
 
-    # --- PLOTLY INTERACTIVE CHART ---
+    # If the user sets a target, we switch to Binary (Red/Green)
+    # If no target (or custom mode where user wants to see gradient), we could keep gradient
+    # But for "Green Zone Analysis", binary is usually better.
+    # To bring back the "Heatmap Gradient" when no specific target is set is tricky because
+    # the target defaults to 600.
+
+    # Let's keep your previous "Green Zone" Logic (Binary) which is very useful for planning
+    color_df = pivot_df.map(lambda x: 1 if x >= target_score else 0)
+
     fig = px.imshow(
-        pivot_df,
-        text_auto=True,                # Shows the score number in the box
-        aspect="auto",                 # Stretches to fit screen
-        color_continuous_scale="RdYlGn", # Red to Green color scale
-        range_color=[550, 650]         # Min/Max for color logic
+        color_df,
+        text_auto=False,
+        aspect="auto",
+        color_continuous_scale=["#ef4444", "#22c55e"],
+        range_color=[0, 1]
     )
 
-    # Clean up the layout
+    fig.update_traces(
+        text=pivot_df.values,
+        texttemplate="%{text}",
+        hovertemplate=f"{y_label_sel}: %{{y}}<br>{x_label_sel}: %{{x}}<br><b>Score: %{{text}}</b><extra></extra>"
+    )
+
     fig.update_layout(
-        title=dict(text="Score Heatmap", x=0.5),
-        xaxis_title=x_axis[0],
-        yaxis_title=y_axis[0],
-        coloraxis_showscale=False      # Hide the color bar to save space on mobile
+        title=dict(text=t("green_zone").format(score=target_score), x=0.5),
+        xaxis=dict(type='category', title=x_label_sel, tickmode='array', tickvals=x_vals),
+        yaxis=dict(type='category', title=y_label_sel),
+        coloraxis_showscale=False,
+        margin=dict(l=0, r=0, t=40, b=0)
     )
 
-    # Add tooltips
-    fig.update_traces(hovertemplate="%{y}: %{y}<br>%{x}: %{x}<br><b>Score: %{z}</b><extra></extra>")
-
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
+    st.caption(t("legend"))
