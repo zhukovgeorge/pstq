@@ -338,17 +338,18 @@ with tab_dash:
         with c1:
             st.write(f"{t('age')}: {audit['hc_age']}")
             st.write(f"{t('edu')}: {audit['hc_edu']}")
-            st.write(f"Fr: {audit['hc_french']}")
-            st.write(f"Exp: {audit['hc_exp']}")
+            st.write(f"French Language: {audit['hc_french']}")
+            st.write(f"Experience General: {audit['hc_exp']}")
         with c2:
             st.write(f"{t('shortage')}: {audit['qn_diag']}")
-            st.write(f"QC Exp: {audit['qn_qc_exp']}")
-            st.write(f"VJO: {audit['qn_vjo']}")
+            st.write(f"Quebec Experience: {audit['qn_qc_exp']}")
+            st.write(f"Validated Job Offer: {audit['qn_vjo']}")
             st.write(f"Reg: {audit['qn_out']}")
         with c3:
-            st.write(f"Sp Fr: {audit.get('ad_fr', 0)}")
-            st.write(f"Sp Age: {audit.get('ad_age', 0)}")
-            st.write(f"Sp QC: {audit.get('ad_exp', 0)}")
+            st.write(f"Spouse French Language: {audit.get('ad_fr', 0)}")
+            st.write(f"Spouse Age: {audit.get('ad_age', 0)}")
+            st.write(f"Spouse Quebec Experience: {audit.get('ad_exp', 0)}")
+            st.write(f"Spouse Education: {audit.get('ad_edu', 0)}")
 
 # --- TAB 3: LATEST DRAWS ---
 with tab_draws:
