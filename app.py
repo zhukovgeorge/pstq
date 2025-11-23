@@ -344,7 +344,9 @@ with tab_dash:
             st.write(f"{t('shortage')}: {audit['qn_diag']}")
             st.write(f"Quebec Experience: {audit['qn_qc_exp']}")
             st.write(f"Validated Job Offer: {audit['qn_vjo']}")
-            st.write(f"Reg: {audit['qn_out']}")
+            # st.write(f"Reg: {audit['qn_out']}")
+            st.write(f"Residence Outside Quebec: {audit['out_res']}")
+            st.write(f"Work Outside Quebec: {audit['out_work']}")
         with c3:
             st.write(f"Spouse French Language: {audit.get('ad_fr', 0)}")
             st.write(f"Spouse Age: {audit.get('ad_age', 0)}")
