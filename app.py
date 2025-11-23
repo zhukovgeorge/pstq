@@ -246,7 +246,15 @@ def calculate_score_v10(p):
     audit['qn_dip'] = qn_dip
     qn += qn_dip
 
-    qn_out = band_points(p['out_res'], OUT_CMM_RES) + band_points(p['out_work'], OUT_CMM_WORK) + band_points(p['out_study'], OUT_CMM_STUDY)
+    pts_out_res = band_points(p['out_res'], OUT_CMM_RES)
+    pts_out_work = band_points(p['out_work'], OUT_CMM_WORK)
+    pts_out_study = band_points(p['out_study'], OUT_CMM_STUDY)
+
+    audit['out_res_pts'] = pts_out_res
+    audit['out_work_pts'] = pts_out_work
+    audit['out_study_pts'] = pts_out_study
+
+    qn_out = pts_out_res + pts_out_work + pts_out_study
     audit['qn_out'] = qn_out
     qn += qn_out
 
@@ -345,8 +353,10 @@ with tab_dash:
             st.write(f"Quebec Experience: {audit['qn_qc_exp']}")
             st.write(f"Validated Job Offer: {audit['qn_vjo']}")
             # st.write(f"Reg: {audit['qn_out']}")
-            st.write(f"Residence Outside Quebec: {audit['out_res']}")
-            st.write(f"Work Outside Quebec: {audit['out_work']}")
+            st.write(f"Residence Outside Quebec: {audit['out_res_pts']}")
+            st.write(f"Work Outside Quebec: {audit['out_work_pts']}")
+            if audit.get('out_study_pts', 0) > 0:
+                st.write(f"Study (Region): {audit['out_study_pts']}")
         with c3:
             st.write(f"Spouse French Language: {audit.get('ad_fr', 0)}")
             st.write(f"Spouse Age: {audit.get('ad_age', 0)}")
