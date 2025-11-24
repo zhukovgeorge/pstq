@@ -1,8 +1,8 @@
 # translations.py
 
+# ==========================================
 # 1. MAPPINGS FOR LOGIC-HEAVY INPUTS
-# Keys = The English values your scoring engine expects
-# Values = The Display text (EN / FR)
+# ==========================================
 
 EDU_MAP = {
     "PhD": {"en": "PhD", "fr": "Doctorat"},
@@ -41,7 +41,10 @@ AXIS_MAP_LABELS = {
     "sp_fr_target": {"en": "Spouse French Target (All Skills)", "fr": "Cible Français (Conjoint)"}
 }
 
+# ==========================================
 # 2. GENERAL UI TEXT
+# ==========================================
+
 TEXTS = {
     "en": {
         "app_title": "🍁 Quebec PSTQ Simulator",
@@ -109,7 +112,20 @@ TEXTS = {
         "draws_title": "📢 Recent Invitation Rounds",
         "draws_sub": "Use these values to understand the cutoff scores for different streams.",
         "tip": "💡 **Tip:** Go to the 'Strategy Simulator' tab and select one of these rounds to visualize exactly what you need to do to reach the Green Zone.",
-        "stream_def": "ℹ️ Stream Definitions"
+        "stream_def": "ℹ️ Stream Definitions",
+
+        # --- TOOLTIPS (EXPLANATIONS) ---
+        "tip_age": "Points are maximized between ages 18-30 and decrease progressively until age 45.",
+        "tip_edu": "Points are awarded for your highest obtained diploma. (e.g., A Master's scores higher than a Bachelor's).",
+        "tip_exp": "Full-time work experience (30h+/week) acquired in the last 5 years, anywhere in the world.",
+        "tip_fr": "Points for Listening, Speaking, Reading, and Writing. NCLC Level 7 is the key threshold for higher points.",
+        "tip_diag": "Bonus points if your primary occupation is listed as 'Deficit' (Shortage) in the government's annual planning.",
+        "tip_qc_exp": "Work experience physically performed within the province of Quebec.",
+        "tip_qc_dip": "Points if you obtained your diploma from a recognized Quebec educational institution.",
+        "tip_vjo": "Requires a formal Validated Job Offer (VJO) approved by the Ministry (MIFI).",
+        "tip_auth": "Points if you hold a license to practice for a regulated profession in Quebec (e.g., Nursing, Engineering).",
+        "tip_reg": "Bonus points for living, working, or studying in regions outside the Montreal Metropolitan Area (CMM).",
+        "tip_sp_gen": "Your spouse contributes points based on their Age, Education, French proficiency, and Quebec Experience.",
     },
 
     "fr": {
@@ -178,6 +194,19 @@ TEXTS = {
         "draws_title": "📢 Rondes d'invitation récentes",
         "draws_sub": "Utilisez ces valeurs pour comprendre les scores de coupure.",
         "tip": "💡 **Astuce:** Allez dans l'onglet 'Simulateur' et sélectionnez une de ces rondes pour visualiser comment atteindre la Zone Verte.",
-        "stream_def": "ℹ️ Définitions des Volets"
+        "stream_def": "ℹ️ Définitions des Volets",
+
+        # --- TOOLTIPS (EXPLANATIONS) ---
+        "tip_age": "Les points sont maximisés entre 18 et 30 ans et diminuent progressivement jusqu'à 45 ans.",
+        "tip_edu": "Points attribués pour votre diplôme le plus élevé (ex: Maîtrise vaut plus que Baccalauréat).",
+        "tip_exp": "Expérience de travail à temps plein (30h+/sem) acquise au cours des 5 dernières années, n'importe où dans le monde.",
+        "tip_fr": "Points pour Écoute, Parler, Lecture, Écriture. Le niveau NCLC 7 est le seuil clé.",
+        "tip_diag": "Points bonus si votre profession est listée comme 'Déficitaire' (Pénurie) dans la planification annuelle.",
+        "tip_qc_exp": "Expérience de travail effectuée physiquement sur le territoire québécois.",
+        "tip_qc_dip": "Points si vous avez obtenu votre diplôme dans un établissement d'enseignement du Québec.",
+        "tip_vjo": "Nécessite une Offre d'emploi validée (OEV) formellement approuvée par le MIFI.",
+        "tip_auth": "Points si vous détenez un permis d'exercice pour une profession réglementée (ex: Ordre des ingénieurs).",
+        "tip_reg": "Points bonus pour vivre, travailler ou étudier dans une région hors de la Communauté métropolitaine de Montréal (CMM).",
+        "tip_sp_gen": "Votre conjoint(e) contribue des points selon son Âge, sa Scolarité, son Français et son Expérience au Québec.",
     }
 }
