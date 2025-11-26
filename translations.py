@@ -5,12 +5,22 @@
 # ==========================================
 
 EDU_MAP = {
-    "PhD": {"en": "PhD", "fr": "Doctorat"},
-    "Masters": {"en": "Masters", "fr": "Maîtrise"},
-    "Bachelors 3y+": {"en": "Bachelors 3y+", "fr": "Baccalauréat 3 ans+"},
-    "Bachelors 2y": {"en": "Bachelors 2y", "fr": "Baccalauréat 2 ans"},
-    "Tech Diploma 3y": {"en": "Tech Diploma 3y", "fr": "DEC Technique / Diplôme 3 ans"},
-    "High School": {"en": "High School", "fr": "Secondaire (DES)"}
+    'PhD': {'en': 'PhD (Univ 3rd Cycle)', 'fr': 'Doctorat (3e cycle)'},
+    'MedSpec': {'en': 'Medicine/Dentistry/Optometry (Master/PhD level)', 'fr': 'Médecine/Dentisterie/Optométrie'},
+    'Masters 2y': {'en': 'Masters (2 years+)', 'fr': 'Maîtrise (2 ans+)'},
+    'Masters 1y': {'en': 'Masters (1 year)', 'fr': 'Maîtrise (1 an)'},
+    'Bach 5y': {'en': 'Bachelors (5 years+)', 'fr': 'Baccalauréat (5 ans+)'},
+    'Bach 3y': {'en': 'Bachelors (3-4 years)', 'fr': 'Baccalauréat (3-4 ans)'},
+    'Bach 2y': {'en': 'Bachelors (2 years)', 'fr': 'Baccalauréat (2 ans)'},
+    'Bach 1y': {'en': 'Univ 1st Cycle (1 year)', 'fr': 'Univ 1er cycle (1 an)'},
+    'Tech 3y': {'en': 'College Technical (3 years / DEC)', 'fr': 'Collégial technique (3 ans)'},
+    'Tech 2y': {'en': 'College Technical (1-2 years)', 'fr': 'Collégial technique (1-2 ans)'},
+    'Tech 900h': {'en': 'College Technical (900h+ / AEC)', 'fr': 'Collégial technique (900h+ / AEC)'},
+    'College Gen': {'en': 'College General (2 years)', 'fr': 'Collégial préuniversitaire (2 ans)'},
+    'DEP 1y': {'en': 'Vocational (1 year+ outside QC)', 'fr': 'Secondaire prof. (1 an+ hors QC)'},
+    'DEP 900h': {'en': 'Vocational (DEP 900h+)', 'fr': 'DEP (900h+)'},
+    'DEP 600h': {'en': 'Vocational (DEP 600-899h)', 'fr': 'DEP (600-899h)'},
+    'HS': {'en': 'High School (General)', 'fr': 'Secondaire général'}
 }
 
 DIAG_MAP = {
@@ -26,13 +36,21 @@ VJO_MAP = {
 }
 
 QC_DIP_MAP = {
-    "None": {"en": "None", "fr": "Aucun"},
-    "PhD": {"en": "PhD", "fr": "Doctorat"},
-    "Masters": {"en": "Masters", "fr": "Maîtrise"},
-    "Bachelors 3y+": {"en": "Bachelors 3y+", "fr": "Baccalauréat 3 ans+"},
-    "Bachelors 2y": {"en": "Bachelors 2y", "fr": "Baccalauréat 2 ans"},
-    "Tech Diploma 3y": {"en": "Tech Diploma 3y", "fr": "DEC Technique / Diplôme 3 ans"},
-    "Vocational (DEP)": {"en": "Vocational (DEP)", "fr": "DEP (1800h)"}
+    'PhD': {'en': 'PhD', 'fr': 'Doctorat'},
+    'MedSpec': {'en': 'Medicine/Dentistry (2y+)', 'fr': 'Médecine/Dentisterie (2 ans+)'},
+    'Masters 2y': {'en': 'Masters (2 years+)', 'fr': 'Maîtrise (2 ans+)'},
+    'Masters 1y': {'en': 'Masters (1 year)', 'fr': 'Maîtrise (1 an)'},
+    'Bach 5y': {'en': 'Bachelors (5 years+)', 'fr': 'Baccalauréat (5 ans+)'},
+    'Bach 3y': {'en': 'Bachelors (3-4 years)', 'fr': 'Baccalauréat (3-4 ans)'},
+    'Bach 2y': {'en': 'Bachelors (2 years)', 'fr': 'Baccalauréat (2 ans)'},
+    'Bach 1y': {'en': 'Univ 1st Cycle (1 year)', 'fr': 'Univ 1er cycle (1 an)'},
+    'Tech 3y': {'en': 'Tech DEC (3 years)', 'fr': 'DEC Technique (3 ans)'},
+    'Tech 900h': {'en': 'AEC (>900h) / Tech (>900h)', 'fr': 'AEC (>900h) / Technique'},
+    'College Gen': {'en': 'Pre-University DEC (2 years)', 'fr': 'DEC Préuniversitaire'},
+    'DEP 900h': {'en': 'DEP (>900h)', 'fr': 'DEP (>900h)'},
+    'DEP 600h': {'en': 'DEP (600-899h)', 'fr': 'DEP (600-899h)'},
+    'HS': {'en': 'High School (DES)', 'fr': 'Secondaire général (DES)'},
+    'None': {'en': 'None', 'fr': 'Aucun'}
 }
 
 AXIS_MAP_LABELS = {
@@ -96,7 +114,6 @@ TEXTS = {
         "qn": "Quebec Needs",
         "ad": "Adaptation",
         "total_score": "TOTAL SCORE",
-        "passing_bench": "(General Passing Benchmark ~590+)",
         "breakdown": "See Detailed Point Breakdown",
         "shortage": "Shortage",
 
@@ -214,7 +231,6 @@ TEXTS = {
         "qn": "Besoins du Québec",
         "ad": "Adaptabilité",
         "total_score": "SCORE TOTAL",
-        "passing_bench": "(Seuil de passage général ~590+)",
         "breakdown": "Voir le détail des points",
         "shortage": "Pénurie",
 
