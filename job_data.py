@@ -90,7 +90,7 @@ JOBS = [
     {'NOC': '21221', 'Title': 'Spécialistes des systèmes commerciaux', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
     {'NOC': '21222', 'Title': 'Spécialistes de l\'informatique', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
     {'NOC': '21223', 'Title': 'Analystes de bases de données et administrateurs/administratrices de données', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
-    {'NOC': '21230', 'Title': 'Développeurs/développeuses et programmeurs/programmeuses de systèmes informatiques', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
+    {'NOC': '21230', 'Title': 'Développeurs/développeuses et programmeurs/programmeuses de systèmes informatiques', 'Diagnosis': 'Léger déficit', 'Category': 'STIM / Technologies'},
     {'NOC': '21231', 'Title': 'Ingénieurs/ingénieures et concepteurs/conceptrices en logiciel', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
     {'NOC': '21232', 'Title': 'Développeurs/développeuses et programmeurs/programmeuses de logiciels', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
     {'NOC': '21233', 'Title': 'Concepteurs/conceptrices Web', 'Diagnosis': 'Déficit', 'Category': 'STIM / Technologies'},
