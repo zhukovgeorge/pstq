@@ -126,6 +126,39 @@ TEXTS = {
         "tip_auth": "Points if you hold a license to practice for a regulated profession in Quebec (e.g., Nursing, Engineering).",
         "tip_reg": "Bonus points for living, working, or studying in regions outside the Montreal Metropolitan Area (CMM).",
         "tip_sp_gen": "Your spouse contributes points based on their Age, Education, French proficiency, and Quebec Experience.",
+
+        # --- TEF/TEFAQ/TCF TRANSLATION TAB ---
+        "tab4_title": "French Test Score Converter",
+        "sel_test": "Step 1: Select your Test",
+        # Context for TEF (Simple)
+        "ctx_tef_title": "Understanding the TEF Scale",
+        "ctx_tef_1": "• **Global Scale:** All 4 skills are scored out of **699**.",
+        "ctx_tef_2": "• **Target:** Level 7 (B2) starts at **400 points**.",
+
+        # Context for TCF (Complex)
+        "ctx_tcf_title": "Understanding the TCF Scale (Hybrid)",
+        "ctx_tcf_1": "• **Listening & Reading:** Scored out of **699**.",
+        "ctx_tcf_2": "• **Speaking & Writing:** Scored out of **20**.",
+        "ctx_tcf_warn": "⚠️ **Important:** Please ensure you enter your scores in the correct format below.",
+
+        "enter_score": "Step 2: Enter your raw scores",
+        "tab4_desc": "Convert your raw TEF/TEFAQ/TCF scores into the NCLC bands used for immigration points.",
+        "sel_test": "Select Test Type",
+        "enter_score": "Enter your raw scores below.",
+        "tefaq_note": "TEFAQ focuses on Listening/Speaking. Enter 0 for others if not applicable.",
+        "results_for": "Results: {test}",
+        "col_skill": "Skill",
+        "col_status": "Current Status",
+        "col_dist": "Distance to Next Level",
+        "max_reach": "Max Level 12 Reached! 🏆",
+        "pts_need": "pts needed",
+        "to_reach": "to reach Level",
+        "start_lvl": "Start Lvl",
+        "beginner": "Beginner",
+        "context_header": "Understanding the Scale:",
+        "context_1": "Max Score: 699 points.",
+        "context_2": "Your Goal: Level 7 (B2) is usually the 'Golden Threshold' for Quebec.",
+        "context_3": "The Bars: These show your progress *within your current level* towards the next one.",
     },
 
     "fr": {
@@ -208,5 +241,38 @@ TEXTS = {
         "tip_auth": "Points si vous détenez un permis d'exercice pour une profession réglementée (ex: Ordre des ingénieurs).",
         "tip_reg": "Points bonus pour vivre, travailler ou étudier dans une région hors de la Communauté métropolitaine de Montréal (CMM).",
         "tip_sp_gen": "Votre conjoint(e) contribue des points selon son Âge, sa Scolarité, son Français et son Expérience au Québec.",
+
+        # --- TEF/TEFAQ/TCF TRANSLATION TAB ---
+        "tab4_title": "Convertisseur de scores",
+        "sel_test": "Étape 1 : Choisissez votre test",
+        # Context for TEF
+        "ctx_tef_title": "Comprendre l'échelle TEF",
+        "ctx_tef_1": "• **Échelle Globale :** Les 4 compétences sont notées sur **699**.",
+        "ctx_tef_2": "• **Cible :** Le Niveau 7 (B2) commence à **400 points**.",
+
+        # Context for TCF
+        "ctx_tcf_title": "Comprendre l'échelle TCF (Hybride)",
+        "ctx_tcf_1": "• **Écoute et Lecture :** Notés sur **699**.",
+        "ctx_tcf_2": "• **Parler et Écrire :** Notés sur **20**.",
+        "ctx_tcf_warn": "⚠️ **Important :** Assurez-vous d'entrer vos scores dans le bon format ci-dessous.",
+
+        "enter_score": "Étape 2 : Entrez vos scores",
+        "tab4_desc": "Convertissez vos scores bruts TEF/TEFAQ/TCF en niveaux NCLC.",
+        "sel_test": "Choisir le test",
+        "enter_score": "Entrez vos scores bruts ci-dessous.",
+        "tefaq_note": "Le TEFAQ cible l'Écoute/Parler. Entrez 0 pour les autres si non applicable.",
+        "results_for": "Résultats : {test}",
+        "col_skill": "Compétence",
+        "col_status": "Statut Actuel",
+        "col_dist": "Distance au prochain niveau",
+        "max_reach": "Niveau Max 12 Atteint! 🏆",
+        "pts_need": "pts requis",
+        "to_reach": "pour atteindre le Niveau",
+        "start_lvl": "Début Niv",
+        "beginner": "Débutant",
+        "context_header": "Comprendre l'échelle :",
+        "context_1": "Score Max : 699 points.",
+        "context_2": "Votre But : Le Niveau 7 (B2) est souvent le seuil clé pour le Québec.",
+        "context_3": "Les Barres : Elles montrent votre progression *au sein de votre niveau actuel* vers le suivant.",
     }
 }
