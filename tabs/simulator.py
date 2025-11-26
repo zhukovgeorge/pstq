@@ -91,7 +91,7 @@ def render(p, t, scoring):
     # --- 4. VISUALIZATION ---
     df_sim = pd.DataFrame(results)
     pivot_df = df_sim.pivot(index="y", columns="x", values="score")
-    pivot_df = pivot_df.sort_index(ascending=False)
+    pivot_df = pivot_df.sort_index(ascending=True)
     green_zone_df = pivot_df.map(lambda x: 1 if x >= target_score else 0)
 
     fig = px.imshow(
