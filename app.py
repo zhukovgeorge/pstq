@@ -440,11 +440,19 @@ with tab_draws:
 
     st.info(t('tip'))
 
-# --- TAB 2: SIMULATOR ---
+# ==========================================
+# TAB 2: STRATEGY SIMULATOR (Fixed Alignment)
+# ==========================================
 with tab_sim:
-    st.write(f"### {t('sim_title')}")
+    st.header(t("sim_title"))
+    st.markdown("""
+    This tool simulates how your score changes over time.
+    **Crucial:** It accounts for **Age Decay**. As you gain experience (points up), you also get older (points down).
+    """)
 
-    st.markdown(f"#### {t('step1')}")
+    # --- 1. TARGET SELECTION ---
+    st.subheader(t("step1"))
+
     draw_options = [t("manual")] + [f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" for d in LATEST_DRAWS]
 
     c_sel, c_score = st.columns([3, 1])
@@ -458,13 +466,21 @@ with tab_sim:
             if f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" == target_selection:
                 target_score = d['Score']
                 break
-        c_score.markdown(f"<div class='target-score-box'>Target<br><b style='font-size:20px'>{target_score}</b></div>", unsafe_allow_html=True)
+
+        color = "#16a34a"
+        c_score.markdown(f"""
+        <div style="background-color:#f0fdf4; border:1px solid {color}; color:{color}; padding:10px; border-radius:6px; text-align:center;">
+            <small>TARGET</small><br>
+            <strong style="font-size:1.5rem;">{target_score}</strong>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.divider()
 
-    st.markdown(f"#### {t('step2')}")
+    # --- 2. PARAMETERS ---
+    st.subheader(t("step2"))
 
-    # MAPPED INPUT: Simulator Axis Labels
+    # Labels
     axis_display_opts = list(tr.AXIS_MAP_LABELS.keys())
     axis_display_labels = [tr.AXIS_MAP_LABELS[k][st.session_state.lang] for k in axis_display_opts]
 
@@ -475,78 +491,101 @@ with tab_sim:
     x_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == x_label_sel)
     y_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == y_label_sel)
 
+    # Ranges
     def get_range(k):
-        if k == 'time_travel': return [0, 12, 24, 36, 48, 60]
-        if 'fr' in k: return [5, 6, 7, 8, 9, 10, 12]
+        if k == 'time_travel': return [0, 6, 12, 18, 24, 30, 36, 48, 60]
+        if 'fr' in k: return [4, 5, 6, 7, 8, 9, 10, 12] # Removed 0 and 11 to declutter
         return []
 
-    x_vals, y_vals = get_range(x_key), get_range(y_key)
+    x_vals = get_range(x_key)
+    y_vals = get_range(y_key)
+
+    # --- 3. SIMULATION LOOP ---
     results = []
 
-    for y in y_vals:
-        for x in x_vals:
+    for y_val in y_vals:
+        for x_val in x_vals:
             sim = p.copy()
-            def apply_sim(key, val):
+
+            def apply_sim_logic(key, val):
                 if key == 'time_travel':
+                    # Age Decay Logic
+                    years_passed = int(val / 12)
+                    sim['age'] = sim['age'] + years_passed
+                    if p['spouse']:
+                        sim['sp_age'] = sim['sp_age'] + years_passed
+
                     sim['qc_exp'] += val
                     sim['prim_occ_exp'] += val
                     sim['gen_exp'] += val
-                    sim['sp_qc_exp'] += val
+
+                    if p['spouse']:
+                        sim['sp_qc_exp'] += val
+
                     if sim['out_res'] > 0: sim['out_res'] += val
                     if sim['out_work'] > 0: sim['out_work'] += val
+
                 elif key == 'fr_target':
                     sim['fr_l'] = sim['fr_s'] = sim['fr_r'] = sim['fr_w'] = val
+
                 elif key == 'sp_fr_target':
                     sim['sp_fr_l'] = sim['sp_fr_s'] = sim['sp_fr_r'] = sim['sp_fr_w'] = val
-            apply_sim(x_key, x)
-            apply_sim(y_key, y)
-            s, _ = calculate_score_v10(sim)
-            results.append({"x_data": x, "y_data": y, "Score": s})
 
-    df = pd.DataFrame(results)
-    pivot_df = df.pivot(index="y_data", columns="x_data", values="Score")
+            apply_sim_logic(x_key, x_val)
+            apply_sim_logic(y_key, y_val)
+
+            score, _ = calculate_score_v10(sim)
+            results.append({"x": x_val, "y": y_val, "score": score})
+
+    # --- 4. VISUALIZATION ---
+    df_sim = pd.DataFrame(results)
+
+    # Pivot
+    pivot_df = df_sim.pivot(index="y", columns="x", values="score")
+
+    # SORTING: Ensure Y-Axis has High Values at the TOP
+    # px.imshow renders the first row at the top. So we want Descending order (12 -> 4).
     pivot_df = pivot_df.sort_index(ascending=True)
 
-    text_df = pivot_df.astype(str)
+    # Green Zone Mask
+    green_zone_df = pivot_df.map(lambda x: 1 if x >= target_score else 0)
 
-    # --- FIXED COLOR RANGE ---
-    # We want a min/max dynamic range for better color sensitivity
-    min_score = pivot_df.min().min()
-    max_score = pivot_df.max().max()
-
-    # If the user sets a target, we switch to Binary (Red/Green)
-    # If no target (or custom mode where user wants to see gradient), we could keep gradient
-    # But for "Green Zone Analysis", binary is usually better.
-    # To bring back the "Heatmap Gradient" when no specific target is set is tricky because
-    # the target defaults to 600.
-
-    # Let's keep your previous "Green Zone" Logic (Binary) which is very useful for planning
-    color_df = pivot_df.map(lambda x: 1 if x >= target_score else 0)
-
+    # Plot
     fig = px.imshow(
-        color_df,
+        green_zone_df,
         text_auto=False,
         aspect="auto",
         color_continuous_scale=["#ef4444", "#22c55e"],
         range_color=[0, 1]
     )
 
+    # FIX: Double curly braces {{ }} needed for Python f-strings to pass %{ } to Plotly
     fig.update_traces(
         text=pivot_df.values,
         texttemplate="%{text}",
-        hovertemplate=f"{y_label_sel}: %{{y}}<br>{x_label_sel}: %{{x}}<br><b>Score: %{{text}}</b><extra></extra>"
+        hovertemplate=(
+            f"<b>{y_label_sel}: %{{y}}</b><br>" +
+            f"<b>{x_label_sel}: %{{x}}</b><br>" +
+            "<b>Score: %{text}</b><extra></extra>"
+        )
     )
 
     fig.update_layout(
         title=dict(text=t("green_zone").format(score=target_score), x=0.5),
-        xaxis=dict(type='category', title=x_label_sel, tickmode='array', tickvals=x_vals),
-        yaxis=dict(type='category', title=y_label_sel),
+        # FIX: Force categorical axes to align blocks perfectly
+        xaxis=dict(title=x_label_sel, side="bottom", type='category'),
+        yaxis=dict(title=y_label_sel, type='category'),
         coloraxis_showscale=False,
         margin=dict(l=0, r=0, t=40, b=0)
     )
 
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig, use_container_width=True)
+
     st.caption(t("legend"))
+    st.info("""
+    **Note on 'Future Worked Month':** This simulation assumes that while time passes, you are **aging** (losing points)
+    but simultaneously **working full-time in Quebec** (gaining experience points).
+    """)
 
 # ==========================================
 # TAB 4: FRENCH CONVERTER (Fixed Rendering)
