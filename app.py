@@ -1,10 +1,10 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import translations as tr
 import french_utils as fr_calc
-import plotly.graph_objects as go
+import urllib.parse
+import job_data
 
 # ==========================================
 # 0. PAGE CONFIG & LANGUAGE INIT
@@ -82,24 +82,24 @@ with st.sidebar:
 
     with st.expander(t("sec_applicant"), expanded=True):
         # Age
-        p_age = st.slider(t("age"), 18, 50, 35)
+        p_age = st.slider(t("age"), 18, 50, 36)
 
 
         # General Experience
-        p_gen_exp = st.slider(t("exp"), 0, 60, 36)
+        p_gen_exp = st.slider(t("exp"), 0, 60, 24)
 
         # Education
         edu_display_opts = [get_label(tr.EDU_MAP, k) for k in tr.EDU_MAP.keys()]
         # We need to be careful with index matching when language switches
         # Default to Tech Diploma (index 4) if possible
-        p_edu_label = st.selectbox(t("edu"), options=edu_display_opts, index=4)
+        p_edu_label = st.selectbox(t("edu"), options=edu_display_opts, index=1)
         p_edu = get_key_from_label(tr.EDU_MAP, p_edu_label)
 
         st.caption(t("fr_skills"))
         c1, c2 = st.columns(2)
-        p_fr_l = c1.number_input(t("list"), 0, 12, 5)
+        p_fr_l = c1.number_input(t("list"), 0, 12, 7)
         p_fr_s = c2.number_input(t("speak"), 0, 12, 7)
-        p_fr_r = c1.number_input(t("read"), 0, 12, 5)
+        p_fr_r = c1.number_input(t("read"), 0, 12, 0)
         p_fr_w = c2.number_input(t("write"), 0, 12, 0)
 
     with st.expander(t("sec_job"), expanded=False):
@@ -109,13 +109,13 @@ with st.sidebar:
         p_diag_label = st.selectbox(t("job_diag"), diag_display, index=0)
         p_diag = get_key_from_label(tr.DIAG_MAP, p_diag_label)
 
-        p_prim_occ = st.slider(t("job_prim_exp"), 0, 60, 12)
-        p_qc_exp = st.slider(t("job_qc_exp"), 0, 60, 12)
+        p_prim_occ = st.slider(t("job_prim_exp"), 0, 60, 24)
+        p_qc_exp = st.slider(t("job_qc_exp"), 0, 60, 24)
 
         # VJO
         vjo_keys = ['None', 'Inside Montreal', 'Outside Montreal']
         vjo_display = [get_label(tr.VJO_MAP, k) for k in vjo_keys]
-        p_vjo_label = st.radio(t("vjo"), vjo_display, index=2)
+        p_vjo_label = st.radio(t("vjo"), vjo_display, index=0)
         p_vjo = get_key_from_label(tr.VJO_MAP, p_vjo_label)
 
         p_auth = st.checkbox(t("auth"))
@@ -128,7 +128,7 @@ with st.sidebar:
 
         st.caption(t("reg_ties"))
         p_out_res = st.slider(t("reg_res"), 0, 60, 36)
-        p_out_work = st.slider(t("reg_work"), 0, 60, 12)
+        p_out_work = st.slider(t("reg_work"), 0, 60, 24)
         p_out_study = st.slider(t("reg_study"), 0, 60, 0)
 
     with st.expander(t("sec_spouse"), expanded=False):
@@ -136,20 +136,20 @@ with st.sidebar:
 
         if p_spouse:
             col1, col2 = st.columns(2)
-            sp_age = col1.slider(t("sp_age"), 18, 50, 35)
+            sp_age = col1.slider(t("sp_age"), 18, 50, 38)
 
             # Spouse Edu
             # Use keys from map to ensure order
             sp_keys = ['PhD', 'Masters', 'Bachelors', 'Tech Diploma', 'High School', 'None']
             sp_edu_display = [get_label(tr.EDU_MAP, k) for k in sp_keys]
-            sp_edu_label = col2.selectbox(t("sp_edu"), sp_edu_display, index=1)
+            sp_edu_label = col2.selectbox(t("sp_edu"), sp_edu_display, index=3)
             sp_edu = get_key_from_label(tr.EDU_MAP, sp_edu_label)
 
-            sp_qc_exp = st.slider(t("sp_qc_exp"), 0, 60, 12)
+            sp_qc_exp = st.slider(t("sp_qc_exp"), 0, 60, 24)
 
             st.caption(t("sp_fr"))
             c1, c2 = st.columns(2)
-            sp_l = c1.number_input(t("list"), 0, 12, 0, key="spl")
+            sp_l = c1.number_input(t("list"), 0, 12, 7, key="spl")
             sp_s = c2.number_input(t("speak"), 0, 12, 7, key="sps")
             sp_r = c1.number_input(t("read"), 0, 12, 0, key="spr")
             sp_w = c2.number_input(t("write"), 0, 12, 0, key="spw")
@@ -333,7 +333,14 @@ total, audit = calculate_score_v10(p)
 # 4. MAIN TABS
 # ==========================================
 
-tab_dash, tab_sim, tab_draws, tab_lang = st.tabs([t("tab_dash"), t("tab_sim"), t("tab_draws"), "🌐 French Converter"])
+tab_dash, tab_sim, tab_job, tab_draws, tab_lang, tab_ref = st.tabs([
+    t("tab_dash"),
+    t("tab_sim"),
+    t("tab_job"),
+    t("tab_draws"),
+    t("tab_lang"),
+    t("tab_ref")
+])
 
 # --- TAB 1: DASHBOARD ---
 with tab_dash:
@@ -430,19 +437,19 @@ with tab_dash:
         show_row(t('sp_edu'), audit.get('ad_edu', 0), m_sp_edu, 'tip_sp_gen')
         show_row(t('fam_check'), audit.get('ad_fam', 0), m_fam)
 
-# --- TAB 3: LATEST DRAWS ---
+# --- TAB 4: LATEST DRAWS ---
 with tab_draws:
     st.write(f"### {t('draws_title')}")
     st.write(t('draws_sub'))
 
     draws_df = pd.DataFrame(LATEST_DRAWS)
-    st.dataframe(draws_df, width='stretch', hide_index=True)
+    st.dataframe(draws_df, width='content', hide_index=True)
 
     st.info(t('tip'))
 
-# ==========================================
-# TAB 2: STRATEGY SIMULATOR (Fixed Alignment)
-# ==========================================
+# --- TAB 2: SIMULATOR ---
+import urllib.parse
+
 with tab_sim:
     st.header(t("sim_title"))
     st.markdown("""
@@ -459,19 +466,22 @@ with tab_sim:
     target_selection = c_sel.selectbox(t("select_draw"), draw_options, index=0)
 
     target_score = 600
+    target_stream_name = "Manual Target"
+
     if target_selection == t("manual"):
         target_score = c_score.number_input("Target Score", 500, 900, 600)
     else:
         for d in LATEST_DRAWS:
             if f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" == target_selection:
                 target_score = d['Score']
+                target_stream_name = d['Stream']
                 break
 
         color = "#16a34a"
         c_score.markdown(f"""
         <div style="background-color:#f0fdf4; border:1px solid {color}; color:{color}; padding:10px; border-radius:6px; text-align:center;">
-            <small>TARGET</small><br>
-            <strong style="font-size:1.5rem;">{target_score}</strong>
+            <small style="color:#666; font-size:0.7em; line-height:1.1; display:block; margin-bottom:5px;">{target_stream_name}</small>
+            <strong style="font-size:1.6rem;">{target_score}</strong>
         </div>
         """, unsafe_allow_html=True)
 
@@ -480,7 +490,6 @@ with tab_sim:
     # --- 2. PARAMETERS ---
     st.subheader(t("step2"))
 
-    # Labels
     axis_display_opts = list(tr.AXIS_MAP_LABELS.keys())
     axis_display_labels = [tr.AXIS_MAP_LABELS[k][st.session_state.lang] for k in axis_display_opts]
 
@@ -491,10 +500,9 @@ with tab_sim:
     x_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == x_label_sel)
     y_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == y_label_sel)
 
-    # Ranges
     def get_range(k):
         if k == 'time_travel': return [0, 6, 12, 18, 24, 30, 36, 48, 60]
-        if 'fr' in k: return [4, 5, 6, 7, 8, 9, 10, 12] # Removed 0 and 11 to declutter
+        if 'fr' in k: return [4, 5, 6, 7, 8, 9, 10, 12]
         return []
 
     x_vals = get_range(x_key)
@@ -518,16 +526,12 @@ with tab_sim:
                     sim['qc_exp'] += val
                     sim['prim_occ_exp'] += val
                     sim['gen_exp'] += val
-
-                    if p['spouse']:
-                        sim['sp_qc_exp'] += val
-
+                    if p['spouse']: sim['sp_qc_exp'] += val
                     if sim['out_res'] > 0: sim['out_res'] += val
                     if sim['out_work'] > 0: sim['out_work'] += val
 
                 elif key == 'fr_target':
                     sim['fr_l'] = sim['fr_s'] = sim['fr_r'] = sim['fr_w'] = val
-
                 elif key == 'sp_fr_target':
                     sim['sp_fr_l'] = sim['sp_fr_s'] = sim['sp_fr_r'] = sim['sp_fr_w'] = val
 
@@ -539,57 +543,118 @@ with tab_sim:
 
     # --- 4. VISUALIZATION ---
     df_sim = pd.DataFrame(results)
-
-    # Pivot
     pivot_df = df_sim.pivot(index="y", columns="x", values="score")
-
-    # SORTING: Ensure Y-Axis has High Values at the TOP
-    # px.imshow renders the first row at the top. So we want Descending order (12 -> 4).
     pivot_df = pivot_df.sort_index(ascending=True)
-
-    # Green Zone Mask
     green_zone_df = pivot_df.map(lambda x: 1 if x >= target_score else 0)
 
-    # Plot
     fig = px.imshow(
-        green_zone_df,
-        text_auto=False,
-        aspect="auto",
-        color_continuous_scale=["#ef4444", "#22c55e"],
-        range_color=[0, 1]
+        green_zone_df, text_auto=False, aspect="auto",
+        color_continuous_scale=["#ef4444", "#22c55e"], range_color=[0, 1]
     )
 
-    # FIX: Double curly braces {{ }} needed for Python f-strings to pass %{ } to Plotly
     fig.update_traces(
         text=pivot_df.values,
         texttemplate="%{text}",
-        hovertemplate=(
-            f"<b>{y_label_sel}: %{{y}}</b><br>" +
-            f"<b>{x_label_sel}: %{{x}}</b><br>" +
-            "<b>Score: %{text}</b><extra></extra>"
-        )
+        hovertemplate=(f"<b>{y_label_sel}: %{{y}}</b><br><b>{x_label_sel}: %{{x}}</b><br><b>Score: %{{text}}</b><extra></extra>")
     )
 
     fig.update_layout(
         title=dict(text=t("green_zone").format(score=target_score), x=0.5),
-        # FIX: Force categorical axes to align blocks perfectly
         xaxis=dict(title=x_label_sel, side="bottom", type='category'),
         yaxis=dict(title=y_label_sel, type='category'),
-        coloraxis_showscale=False,
-        margin=dict(l=0, r=0, t=40, b=0)
+        coloraxis_showscale=False, margin=dict(l=0, r=0, t=40, b=0)
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
+
+    # --- 5. SMART AI PROMPT (FULL GAP ANALYSIS) ---
+    st.markdown("### 🤖 Ask AI to Explain")
+
+    # A. Calculate Current Snapshot
+    curr_score, audit = calculate_score_v10(p)
+
+    # B. Define Max Points (Constants for "Headroom" calculation)
+    # Using 'is_spouse' to adjust max values
+    is_sp = p['spouse']
+    max_age = 100 if is_sp else 120
+    max_edu = 110 if is_sp else 130
+    max_exp = 50 if is_sp else 70
+    max_fr_app = 160 if is_sp else 200 # Total French points
+
+    max_diag = 120
+    max_qc_exp = 160
+    max_qc_dip = 200
+    max_vjo = 50
+    max_reg = 120 # Res+Work+Study
+
+    # C. Build the "Full Picture" Audit String
+    full_audit = f"""
+    **A. HUMAN CAPITAL ({audit['total_hc']} / 520)**
+    - Age: {audit['hc_age']} / {max_age} (Current: {p['age']})
+    - Education: {audit['hc_edu']} / {max_edu} ({p['edu']})
+    - Career Experience: {audit['hc_exp']} / {max_exp} ({p['gen_exp']} months)
+    - French (Applicant): {audit['hc_french']} / {max_fr_app} (L:{p['fr_l']} S:{p['fr_s']} R:{p['fr_r']} W:{p['fr_w']})
+
+    **B. QUEBEC NEEDS ({audit['total_qn']} / 700)**
+    - **Job Shortage:** {audit['qn_diag']} / {max_diag} (Diagnosis: {p['diag']})
+    - **Quebec Work History:** {audit['qn_qc_exp']} / {max_qc_exp} ({p['qc_exp']} months)
+    - **Quebec Diploma:** {audit['qn_dip']} / {max_qc_dip} ({p['qc_dip']})
+    - **Validated Job Offer:** {audit['qn_vjo']} / {max_vjo} ({p['vjo']})
+    - **Regional Ties:** {audit['qn_out']} / {max_reg} (Months: {p['out_res']})
+
+    **C. ADAPTATION ({audit['total_ad']} / 180)**
+    - Spouse French: {audit.get('ad_fr',0)} / 40
+    - Spouse Age: {audit.get('ad_age',0)} / 20
+    - Spouse QC Work: {audit.get('ad_exp',0)} / 30
+    - Spouse Edu: {audit.get('ad_edu',0)} / 20
+    """
+
+    csv_string = pivot_df.to_csv(sep=",")
+
+    # D. The "Strategic Pivot" Prompt
+    ai_prompt_text = f"""
+Act as a Senior Quebec Immigration Strategist.
+I am running a simulation to reach a **Target Score of {target_score}** ({target_stream_name}).
+
+Here is my **FULL SCORECARD AUDIT** (Points vs Max Potential):
+{full_audit}
+
+Here is my **SIMULATION MATRIX** (X={x_label_sel}, Y={y_label_sel}):
+{csv_string}
+
+**YOUR TASK: Find the Missing Points.**
+Don't just analyze the matrix. Look at the "Scorecard Audit" for zeros or low scores.
+
+**1. The "Dead End" Check:**
+Look at the Simulation Matrix. If the maximum score < {target_score}, admit that the current path is insufficient.
+
+**2. The "Strategic Pivot" (Hidden Levers):**
+If the simulation fails, look at the Audit above and suggest ONE radical change to bridge the gap.
+- **Is Job Shortage 0/120?** Ask: "Can you switch to a shortage field (IT, Construction, Health)?"
+- **Is Quebec Diploma 0/200?** Ask: "Can you take a 1-year AEC program? That is worth +60-90 points."
+- **Is Regional Ties 0/120?** Ask: "Can you move 50km outside Montreal?"
+- **Is Spouse French low?** Ask: "Can your spouse reach Level 7?"
+
+**3. The Plan:**
+Provide a summary: "Option A: Stay the course (if matrix works)" OR "Option B: The Pivot (if matrix fails)."
+"""
+
+    # E. Magic Link
+    encoded_prompt = urllib.parse.quote(ai_prompt_text)
+    chatgpt_url = f"https://chatgpt.com/?q={encoded_prompt}"
+
+    col_btn, col_info = st.columns([1, 2])
+    with col_btn:
+        st.link_button("🚀 Analyze with ChatGPT", chatgpt_url, type="primary")
+    with col_info:
+        st.caption("Click to open ChatGPT with your **Full Scorecard Audit** and **Simulation Data**.")
+
+    with st.expander("Show Raw Prompt", expanded=False):
+        st.code(ai_prompt_text, language="text")
 
     st.caption(t("legend"))
-    st.info("""
-    **Note on 'Future Worked Month':** This simulation assumes that while time passes, you are **aging** (losing points)
-    but simultaneously **working full-time in Quebec** (gaining experience points).
-    """)
 
-# ==========================================
-# TAB 4: FRENCH CONVERTER (Fixed Rendering)
-# ==========================================
+# --- TAB 5: FRENCH BAND CALCULATOR ---
 with tab_lang:
     st.header(t("tab4_title"))
 
@@ -707,3 +772,230 @@ with tab_lang:
         render_row_clean(t('speak'), sc_s, b_s, 'Expression orale')
         render_row_clean(t('read'), sc_r, b_r, 'Compréhension écrite')
         render_row_clean(t('write'), sc_w, b_w, 'Expression écrite')
+
+
+# ==========================================
+# TAB 3: JOB SHORTAGE SEARCH (Fixed Styling)
+# ==========================================
+
+with tab_job:
+    st.header("🕵️ Job Market Intelligence")
+    st.markdown("""
+    **Goal:** Identify if your profession is in **Deficit** (High Points).
+    *Data Source: Official Govt. Diagnostics*
+    """)
+
+    # --- 1. LOAD DATA ---
+    df_jobs = pd.DataFrame(job_data.JOBS)
+
+    # --- 2. DASHBOARD STATS ---
+    deficit_count = len(df_jobs[df_jobs['Diagnosis'].str.contains("Déficit", na=False)])
+    st.metric("Total Deficit Professions", deficit_count, delta="High Priority Targets")
+
+    st.divider()
+
+    # --- 3. SEARCH & FILTERS ---
+    col_search, col_cat, col_diag = st.columns([2, 1, 1])
+
+    search_txt = col_search.text_input("🔍 Search Job Title or NOC", placeholder="e.g. Software, 21232")
+
+    cat_opts = ["All"] + sorted(df_jobs['Category'].unique().tolist())
+    sel_cat = col_cat.selectbox("Category", cat_opts)
+
+    diag_opts = ["All"] + sorted(df_jobs['Diagnosis'].dropna().unique().tolist())
+    sel_diag = col_diag.selectbox("Diagnosis", diag_opts)
+
+    # Apply Filters
+    filtered = df_jobs.copy()
+
+    if search_txt:
+        mask = filtered.astype(str).apply(lambda x: x.str.contains(search_txt, case=False, na=False)).any(axis=1)
+        filtered = filtered[mask]
+
+    if sel_cat != "All":
+        filtered = filtered[filtered['Category'] == sel_cat]
+
+    if sel_diag != "All":
+        filtered = filtered[filtered['Diagnosis'] == sel_diag]
+
+    # --- 4. DISPLAY TABLE (Standard Theme) ---
+    st.write(f"Showing **{len(filtered)}** matches:")
+
+    # We use standard Streamlit rendering which automatically handles Dark/Light mode
+    st.dataframe(
+        filtered,
+        width='stretch',
+        column_config={
+            "NOC": st.column_config.TextColumn("Code", width="small"),
+            "Title": "Job Title",
+            "Diagnosis": st.column_config.TextColumn("Status", width="medium"),
+            "Category": st.column_config.TextColumn("Sector", width="medium"),
+        },
+        hide_index=True
+    )
+
+    # --- 5. VISUAL ANALYSIS ---
+    if not filtered.empty:
+        with st.expander("📊 View Category Analysis", expanded=False):
+            cat_counts = filtered['Category'].value_counts().reset_index()
+            cat_counts.columns = ['Category', 'Count']
+
+            fig = px.bar(
+                cat_counts,
+                x='Count',
+                y='Category',
+                orientation='h',
+                title="Distribution of Jobs by Category (Filtered)",
+                color='Count',
+                color_continuous_scale="viridis" # Standard professional scale
+            )
+            st.plotly_chart(fig, width='stretch')
+
+
+# ==========================================
+# TAB 5: OFFICIAL SCORING REFERENCE (Vertical Layout)
+# ==========================================
+with tab_ref:
+    st.header("📚 Official Scoring Grids (PSTQ)")
+    st.markdown("""
+    This reference section details the exact point allocation used by the Ministry of Immigration (MIFI).
+    Use these tables to verify your score calculation manually.
+    """)
+
+    grid_cat = st.radio(
+        "Select Category to Explore:",
+        ["1. Human Capital (Age, Edu, French)", "2. Quebec Labor Needs (Work, VJO)", "3. Spouse & Adaptation"],
+        horizontal=True
+    )
+
+    st.divider()
+
+    # --- CATEGORY 1: HUMAN CAPITAL ---
+    if "1." in grid_cat:
+        # 1. AGE SECTION
+        st.subheader("📅 1. Age Points")
+        st.caption("Points are maximized from age 18 to 30, then decrease by ~5 points per year.")
+
+        age_data = []
+        for age in range(18, 46):
+            age_data.append({
+                "Age": str(age) if age < 45 else "45+",
+                "Single Applicant": AGE_SINGLE.get(age, 0),
+                "With Spouse": AGE_SPOUSE_PA.get(age, 0)
+            })
+        st.dataframe(pd.DataFrame(age_data), hide_index=True, width='stretch')
+
+        st.divider()
+
+        # 2. EDUCATION SECTION
+        st.subheader("🎓 2. Education Points")
+        st.caption("Points based on the highest obtained diploma.")
+
+        edu_data = []
+        for key, val in EDU_POINTS_UI.items():
+            edu_data.append({
+                "Diploma Level": get_label(tr.EDU_MAP, key),
+                "Single": val[0],
+                "With Spouse": val[1]
+            })
+        st.dataframe(pd.DataFrame(edu_data), hide_index=True, width='stretch')
+
+        st.divider()
+
+        # 3. FRENCH SECTION
+        st.subheader("🗣️ 3. French Proficiency (Principal Applicant)")
+        st.caption("Points are awarded per skill. **Level 7 (B2)** is the major threshold.")
+
+        fr_data = [
+            {"NCLC Level": "Level 1-4 (Beginner)", "Points (per skill)": "0"},
+            {"NCLC Level": "Level 5-6 (Low B1)", "Points (Single)": "38", "Points (Spouse)": "30"},
+            {"NCLC Level": "Level 7-8 (B2)", "Points (Single)": "44", "Points (Spouse)": "35"},
+            {"NCLC Level": "Level 9-12 (C1/C2)", "Points (Single)": "50", "Points (Spouse)": "40"},
+        ]
+        st.table(pd.DataFrame(fr_data))
+        st.info("**Note:** Total French Score = Sum of all 4 skills. Max possible is 200 (Single) or 160 (With Spouse).")
+
+    # --- CATEGORY 2: QUEBEC NEEDS ---
+    elif "2." in grid_cat:
+        # 1. WORK EXPERIENCE
+        st.subheader("💼 1. Work Experience")
+        st.caption("Points are awarded based on cumulative full-time work experience in the last 5 years.")
+
+        exp_data = []
+        for band in EXP_PA_SINGLE:
+            label = f"{band[0]} to {band[1]-1} months"
+            if band[1] > 1000: label = "48+ months"
+
+            sp_val = 0
+            for sb in EXP_PA_SPOUSE:
+                if sb[0] == band[0]: sp_val = sb[2]
+
+            exp_data.append({
+                "Duration": label,
+                "General Experience": band[2],
+                "Gen. Exp (With Spouse)": sp_val,
+            })
+        st.dataframe(pd.DataFrame(exp_data), hide_index=True, width='stretch')
+
+        st.divider()
+
+        # 2. JOB SHORTAGE
+        st.subheader("🏥 2. Job Shortage Diagnosis")
+        st.caption("Bonus points if your occupation is on the Deficit list.")
+        diag_data = [
+            {"Diagnosis": "Deficit (Déficitaire)", "Points": "Max (Up to 120)"},
+            {"Diagnosis": "Slight Deficit (Léger)", "Points": "Medium"},
+            {"Diagnosis": "Balanced (Équilibré)", "Points": "0"},
+        ]
+        st.table(pd.DataFrame(diag_data))
+
+        st.divider()
+
+        # 3. QUEBEC SPECIFICS
+        st.subheader("⚜️ 3. Quebec Specifics")
+        qc_data = [
+            {"Factor": "Validated Job Offer (Montreal)", "Points": "30"},
+            {"Factor": "Validated Job Offer (Outside MTL)", "Points": "50"},
+            {"Factor": "Quebec Diploma (Tech/Univ)", "Points": "Up to 60-90"},
+            {"Factor": "Regional Ties (Living >2 years)", "Points": "Up to 120"},
+        ]
+        st.dataframe(pd.DataFrame(qc_data), hide_index=True, width='stretch')
+
+    # --- CATEGORY 3: SPOUSE ---
+    elif "3." in grid_cat:
+        st.subheader("❤️ Spouse / Common-Law Partner Factors")
+        st.markdown("If you apply with a spouse, the total score denominator changes. The spouse contributes points to the total.")
+
+        st.divider()
+
+        st.markdown("#### 1. Spouse Education")
+        sp_edu_data = [{"Level": k, "Points": v} for k, v in EDU_SPOUSE_UI.items()]
+        st.dataframe(pd.DataFrame(sp_edu_data), hide_index=True, width='stretch')
+
+        st.divider()
+
+        st.markdown("#### 2. Spouse Age")
+        sp_age_data = [{"Age": str(k), "Points": v} for k, v in SP_AGE_ADAPT.items() if k % 2 == 0]
+        st.dataframe(pd.DataFrame(sp_age_data), hide_index=True, width='stretch')
+
+        st.divider()
+
+        st.markdown("#### 3. Spouse French (Oral Only)")
+        st.caption("Spouse points are usually awarded for Listening and Speaking only.")
+        sp_fr_data = [
+            {"Level": "Level 1-4", "Points": "0"},
+            {"Level": "Level 5-6", "Points": "6"},
+            {"Level": "Level 7-8", "Points": "8"},
+            {"Level": "Level 9+", "Points": "10"},
+        ]
+        st.table(pd.DataFrame(sp_fr_data))
+
+        st.divider()
+
+        st.markdown("#### 4. Spouse Quebec Work")
+        sp_qc_data = []
+        for band in SP_QC_EXP_TABLE:
+            label = f"{band[0]} to {band[1]-1} months"
+            if band[1] > 1000: label = "48+ months"
+            sp_qc_data.append({"Duration": label, "Points": band[2]})
+        st.dataframe(pd.DataFrame(sp_qc_data), hide_index=True, width='stretch')

@@ -87,6 +87,9 @@ TEXTS = {
         "tab_dash": "📊 Dashboard",
         "tab_sim": "🚀 Strategy Simulator",
         "tab_draws": "📜 Latest Draws",
+        "tab_lang": "🌐 French Converter",
+        "tab_job": "🕵️ Job Search",
+        "tab_ref": "📚 Official Scoring Grids",
 
         # Dashboard
         "hc": "Human Capital",
@@ -202,6 +205,9 @@ TEXTS = {
         "tab_dash": "📊 Tableau de Bord",
         "tab_sim": "🚀 Simulateur",
         "tab_draws": "📜 Derniers Tirages",
+        "tab_lang": "🌐 Convertisseur Français",
+        "tab_job": "🕵️ Recherche d'Emploi",
+        "tab_ref": "📚 Grilles Officielles",
 
         # Dashboard
         "hc": "Capital Humain",
