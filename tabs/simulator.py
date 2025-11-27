@@ -299,44 +299,41 @@ def render(p, t, scoring):
 
     # --- REVISED PROMPT: NUANCED ADVISOR ---
     ai_prompt_text = f"""
-Act as a Senior Quebec Immigration Strategist.
-I am running a simulation to reach a **Target Score of {target_score}. Be concise.
+    Act as a Senior Quebec Immigration Strategist.
+    I am running a simulation to reach a **Target Score of {target_score}. Be concise.
 
-MY TRUTH DATA:
-1. Validated Job Offer (VJO): {"YES (+50 pts)" if has_vjo_points else "NO"}
-2. Job Shortage Score: {shortage_score} / {max_diag}
-3. French Reading/Writing Zeros: {"YES" if has_french_zeros else "NO"}
-4. Spouse Potential: {"YES" if spouse_can_improve else "NO"}
-5. Simulation Max: {sim_max_score} vs Target: {target_score}
+    MY TRUTH DATA:
+    1. Validated Job Offer (VJO): {"YES (+50 pts)" if has_vjo_points else "NO"}
+    2. Job Shortage Score: {shortage_score} / {max_diag}
+    3. French Reading/Writing Zeros: {"YES" if has_french_zeros else "NO"}
+    4. Spouse Potential: {"YES" if spouse_can_improve else "NO"}
+    5. Simulation Max: {sim_max_score} vs Target: {target_score}
 
-YOUR MISSION: Analyze Risk vs. Reward (Do not be authoritarian) (Max 250 words).
-Use a professional, advisory tone. Do not use words like "Forbidden," "Stop," or "Non-negotiable."
-Get straight to the point. No fluff. No "I hope this helps."
+    YOUR MISSION: Analyze Risk vs. Reward (Do not be authoritarian) (Max 250 words).
+    Use a professional, advisory tone. Do not use words like "Forbidden," "Stop," or "Non-negotiable."
+    Get straight to the point. No fluff. No "I hope this helps."
 
-STRATEGIC ANALYSIS FRAMEWORK:
+    STRATEGIC ANALYSIS FRAMEWORK:
+    1. The "Administrative" Trade-off (Job Title/NOC)
+    2. The "Efficiency" Calculation (Language)
+    3. The "Structural" Gap (Education)
 
-1. The "Administrative" Trade-off (Job Title/NOC)**
-- Scenario: I have a VJO (+50 pts).
-- Analysis: Calculate the *Net Impact* of changing my NOC to chase Shortage points.
-- Logic: "If you change NOC, you likely lose the VJO (-50) to gain Shortage points (+??). Is Shortage > 50? If not, advise that it is a net loss, but acknowledge it is the user's choice to take that risk."
-
-2. The "Efficiency" Calculation (Language)
-- Check Reading/Writing. If Zeros, highlight this as the highest ROI lever (Low Cost / High Points).
-- Check Spouse. If they can improve, highlight that even small gains (Level 4) might bridge the gap.
-
-3. The "Structural" Gap (Education)
-- **Check:** If [Simulation Max < Target] AND [Language Levers are exhausted].
-- **Verdict:** If the math proves I cannot reach the target with Time + French, then (and only then) suggest the Diploma.
-- **Tone:** Present it as an investment decision: "To bridge the final X points, you may need to 'buy' structure via a Diploma ($15k+)."
-
-OUTPUT FORMAT:
-1. **Strategic Diagnosis:** Review the VJO/Shortage trade-off calmly.
-2. **The Efficiency Check:** ROI of Applicant French vs Spouse French.
-3. **The Final Plan:** Step-by-step recommendation prioritizing "Free" points before "Expensive" ones.
-"""
+    OUTPUT FORMAT:
+    1. **Strategic Diagnosis**
+    2. **The Efficiency Check**
+    3. **The Final Plan**
+    """
 
     encoded_prompt = urllib.parse.quote(ai_prompt_text)
     chatgpt_url = f"https://chatgpt.com/?q={encoded_prompt}"
+
+    # --- DISCLAIMER WARNING ---
+    st.warning("""
+    **⚠️ READ BEFORE CLICKING:**
+    * **AI Hallucinations:** ChatGPT can make mistakes or invent facts. **Do not rely on this analysis alone.**
+    * **Unofficial Logic:** This prompt is based on the developer's general understanding of the process. It does not know your exact legal situation or nuances.
+    * **Your Responsibility:** You must critically analyze the AI's advice and make your own decisions. This tool is for brainstorming, not legal advice.
+    """)
 
     col_btn, col_info = st.columns([1, 2])
     with col_btn:
