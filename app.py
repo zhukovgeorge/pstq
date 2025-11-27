@@ -3,7 +3,7 @@ import translations as tr
 import logic.scoring as scoring
 
 # Import the UI Tabs
-from tabs import dashboard, simulator, job_search, draws, french, reference
+from tabs import dashboard, simulator, job_search, draws, french, reference, contact
 
 # ==========================================
 # 0. PAGE CONFIG & LANGUAGE INIT
@@ -157,13 +157,14 @@ total_score, audit_log = scoring.calculate_score(profile)
 # ==========================================
 st.title(t("app_title"))
 
-t1, t2, t3, t4, t5, t6 = st.tabs([
+t1, t2, t3, t4, t5, t6, t7 = st.tabs([
     t("tab_dash"),
     t("tab_sim"),
     t("tab_job"),
     t("tab_draws"),
     t("tab_lang"),
-    t("tab_ref")
+    t("tab_ref"),
+    t("tab_contact")
 ])
 
 with t1: dashboard.render(profile, total_score, audit_log, t)
@@ -172,3 +173,26 @@ with t3: job_search.render()
 with t4: draws.render(scoring.LATEST_DRAWS, t)
 with t5: french.render(t)
 with t6: reference.render(t, scoring, tr)
+with t7: contact.render(t)
+
+# ==========================================
+# 4. GLOBAL FOOTER (LEGAL DISCLAIMER)
+# ==========================================
+st.divider()
+
+# You can manually update this date whenever you change the scoring logic
+last_update_date = "27 Novembre 2025"
+
+st.markdown(f"""
+<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #dc3545; font-size: 0.8rem; color: #495057; margin-top: 20px; margin-bottom: 20px;'>
+    <strong>AVIS DE NON-RESPONSABILITÉ :</strong> <br>
+    Cet outil de simulation est fourni à des fins strictement informatives et ne constitue pas un avis juridique.
+    Bien que <strong>ce calculateur</strong> s'efforce de maintenir les critères à jour, les lois et règlements du Ministère de l’Immigration (MIFI) sont sujets à changement sans préavis.
+    Par conséquent, les résultats présentés sont des estimations non officielles et ne garantissent aucunement l'obtention d'un Certificat de sélection du Québec (CSQ) ou d'un visa.
+    L'utilisation de cet outil ne crée aucune relation client-consultant.
+    Pour une analyse officielle et conforme à votre situation, veuillez consulter un représentant autorisé.
+    <strong>L'éditeur de cet outil</strong> décline toute responsabilité quant aux décisions prises ou aux actions entreprises sur la base de ces résultats.
+    <br><br>
+    <span style="font-weight:bold; color: #212529;">📅 Dernière mise à jour de la logique : {last_update_date}</span>
+</div>
+""", unsafe_allow_html=True)

@@ -108,6 +108,7 @@ TEXTS = {
         "tab_lang": "🌐 French Converter",
         "tab_job": "🕵️ Job Search",
         "tab_ref": "📚 Official Scoring Grids",
+        "tab_contact": "📬 Contact",
 
         # Dashboard
         "hc": "Human Capital",
@@ -225,6 +226,7 @@ TEXTS = {
         "tab_lang": "🌐 Convertisseur Français",
         "tab_job": "🕵️ Recherche d'Emploi",
         "tab_ref": "📚 Grilles Officielles",
+        "tab_contact": "📬 Contact",
 
         # Dashboard
         "hc": "Capital Humain",
