@@ -70,13 +70,25 @@ def render(p, t, scoring):
 
     # --- 2. PARAMETERS ---
     st.subheader(t("step2"))
-    axis_display_opts = list(tr.AXIS_MAP_LABELS.keys())
+
+    # FILTER: Exclude 'sp_fr_target' from the list of keys
+    # We use a list comprehension to keep everything EXCEPT Spouse French
+    axis_display_opts = [
+        k for k in tr.AXIS_MAP_LABELS.keys()
+        if k != 'sp_fr_target'
+    ]
+
+    # Map the keys to their translated labels for the dropdown
     axis_display_labels = [tr.AXIS_MAP_LABELS[k][st.session_state.lang] for k in axis_display_opts]
 
     col_x, col_y = st.columns(2)
     x_label_sel = col_x.selectbox(t("x_axis"), axis_display_labels, index=0)
-    y_label_sel = col_y.selectbox(t("y_axis"), axis_display_labels, index=1)
 
+    # Logic to ensure we don't crash if the default index (1) is out of bounds
+    default_y_index = 1 if len(axis_display_labels) > 1 else 0
+    y_label_sel = col_y.selectbox(t("y_axis"), axis_display_labels, index=default_y_index)
+
+    # Reverse lookup: Find the key based on the selected label
     x_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == x_label_sel)
     y_key = next(k for k, v in tr.AXIS_MAP_LABELS.items() if v[st.session_state.lang] == y_label_sel)
 
@@ -88,13 +100,17 @@ def render(p, t, scoring):
     x_vals = get_range(x_key)
     y_vals = get_range(y_key)
 
-    # --- 3. SIMULATION LOOP ---
+# --- 3. SIMULATION LOOP ---
     results = []
+
+    # Import pandas here just in case (though it's likely at top of file)
+    import pandas as pd
 
     for y_val in y_vals:
         for x_val in x_vals:
             sim = p.copy()
 
+            # Define the logic function inside the loop to capture variables
             def apply_sim_logic(key, val):
                 if key == 'time_travel':
                     years_passed = int(val / 12)
@@ -121,37 +137,128 @@ def render(p, t, scoring):
             apply_sim_logic(x_key, x_val)
             apply_sim_logic(y_key, y_val)
 
+            # --- NEW: CALCULATE DATE ---
+            # We assume x_val is "months passed".
+            # If x_axis is NOT time_travel, x_val might be something else,
+            # but usually "time_travel" is the only time-based axis in your app.
+
+            months_passed = 0
+            if x_key == 'time_travel': months_passed = x_val
+            elif y_key == 'time_travel': months_passed = y_val
+
+            future_date = pd.Timestamp.now() + pd.DateOffset(months=months_passed)
+            date_str = future_date.strftime("%b %Y") # e.g. "Nov 2026"
+
             score, _ = scoring.calculate_score(sim)
-            results.append({"x": x_val, "y": y_val, "score": score})
+
+            # SAVE DATA
+            results.append({
+                "x": x_val,
+                "y": y_val,
+                "score": score,
+                "age": sim.get('age', age_val), # Save the simulated age
+                "date": date_str                # Save the calculated date
+            })
 
     # --- 4. VISUALIZATION ---
+    # 1. CREATE DATAFRAME & TEXT
     df_sim = pd.DataFrame(results)
-    pivot_df = df_sim.pivot(index="y", columns="x", values="score")
-    pivot_df = pivot_df.sort_index(ascending=True)
-    green_zone_df = pivot_df.map(lambda x: 1 if x >= target_score else 0)
 
-    fig = px.imshow(
-        green_zone_df, text_auto=False, aspect="auto",
-        color_continuous_scale=["#ef4444", "#22c55e"], range_color=[0, 1]
+    df_sim["tooltip"] = df_sim.apply(
+        lambda row: (
+            f"<b>{y_label_sel}: {row['y']}</b><br>"
+            f"<b>{x_label_sel}: {row['x']}</b><br><br>"
+            f"<b>📅 Date: {row.get('date', 'N/A')}</b><br>"
+            f"<b>🎂 Age: {row.get('age', 'N/A')}</b><br>"
+            f"<b>🏆 Score: {row['score']}</b>"
+        ),
+        axis=1
     )
 
+    # 2. PREPARE DATA
+    pivot_df = df_sim.pivot(index="y", columns="x", values="score").sort_index()
+    p_tooltip = df_sim.pivot(index="y", columns="x", values="tooltip").sort_index()
+
+    # 3. COLOR LOGIC (Gradient Red -> Static Green)
+    min_val = pivot_df.min().min()
+    max_val = pivot_df.max().max()
+
+    # Avoid divide-by-zero
+    if max_val == min_val: max_val += 1
+
+    # Calculate the Cutoff Ratio
+    if target_score >= max_val:
+        mid_ratio = 1.0
+    elif target_score <= min_val:
+        mid_ratio = 0.0
+    else:
+        mid_ratio = (target_score - min_val) / (max_val - min_val)
+
+    # --- THE COLOR FIX ---
+    # 1. Start at Dark Red
+    # 2. Fade to Very Light Red right before the target
+    # 3. Switch to Solid Green AT the target
+    # 4. Stay Solid Green until the max score
+    custom_colors = [
+        [0.0, "#7f1d1d"],       # Darkest Red (Worst Score)
+        [mid_ratio, "#fca5a5"], # Lightest Red (Almost there)
+        [mid_ratio, "#16a34a"], # Solid Green (Target Reached)
+        [1.0, "#16a34a"]        # Solid Green (Max Score - SAME COLOR)
+    ]
+
+    # 4. DRAW CHART
+    fig = px.imshow(
+        pivot_df,
+        text_auto=False,
+        aspect="auto",
+        color_continuous_scale=custom_colors,
+        range_color=[min_val, max_val]
+    )
+
+    # 5. UPDATE TRACES
     fig.update_traces(
         text=pivot_df.values,
         texttemplate="%{text}",
-        hovertemplate=(f"<b>{y_label_sel}: %{{y}}</b><br><b>{x_label_sel}: %{{x}}</b><br><b>Score: %{{text}}</b><extra></extra>")
+        customdata=p_tooltip.values.tolist(),
+        hovertemplate="%{customdata}<extra></extra>"
     )
 
+    # 6. LAYOUT
     fig.update_layout(
         title=dict(text=t("green_zone").format(score=target_score), x=0.5),
         xaxis=dict(title=x_label_sel, side="bottom", type='category'),
         yaxis=dict(title=y_label_sel, type='category'),
-        coloraxis_showscale=False, margin=dict(l=0, r=0, t=40, b=0)
+        coloraxis_showscale=False,
+        margin=dict(l=0, r=0, t=40, b=0)
     )
 
     st.plotly_chart(fig, width='stretch')
 
+    # --- 5. EXPLANATION FORMULA ---
+    st.markdown("### 📐 How is this calculated?")
+
+    st.markdown(r"""
+    The simulation recalculates your official score for **every single square** in the grid.
+    It assumes you continue working in your current role:
+
+    $$
+    \text{Future Score} = \text{Current Profile} + \underbrace{\text{Tenure Gain}}_{\color{green}{\text{Points } \uparrow}} - \underbrace{\text{Age Decay}}_{\color{red}{\text{Points } \downarrow}} + \underbrace{\text{Target French}}_{\color{blue}{\text{New Skill Level}}}
+    $$
+    """)
+
+    with st.expander("ℹ️ Click to see exactly what changes"):
+        st.markdown(f"""
+        1.  **Start:** We take your current profile (Age: **{age_val}**, Experience: **{exp_val}** months).
+        2.  **Apply Time Travel:** For every month passed on the axis, we update:
+            * ✅ **General & Quebec Experience:** You gain 1 month of experience.
+            * ✅ **Shortage Job Tenure:** Your primary occupation tenure increases (re-calculating shortage points).
+            * ✅ **Spouse Experience:** Your spouse gains 1 month of Quebec experience (if applicable).
+            * ⚠️ **Age Decay (You & Spouse):** We calculate if you (or your spouse) cross a birthday threshold and deduct points accordingly.
+        3.  **Apply Language Target:** We **replace** your current French test results with the level selected on the axis.
+        """)
+
     # --- 5. STRATEGY ANALYSIS ---
-    st.markdown("### 🤖 Strategy Analysis")
+    st.markdown("### Strategy Analysis")
 
     curr_score, audit = scoring.calculate_score(p)
 
