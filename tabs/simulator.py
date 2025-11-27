@@ -11,6 +11,34 @@ def render(p, t, scoring):
     **Crucial:** It accounts for **Age Decay**. As you gain experience (points up), you also get older (points down).
     """)
 
+    # --- 0. ROBUST INPUT SANITIZATION ---
+    def safe_get(key):
+        val = p.get(key, 0)
+        if val is None: return 0
+        if isinstance(val, (int, float)): return int(val)
+        if isinstance(val, str):
+            val = val.strip()
+            if not val: return 0
+            if not val.isnumeric(): return 0
+        return int(float(val))
+
+    # Clean inputs for simulation math
+    age_val = safe_get('age')
+    edu_val = p.get('edu', '')
+    exp_val = safe_get('gen_exp')
+    qc_exp_val = safe_get('qc_exp')
+
+    # French Skills
+    fr_r_val = safe_get('fr_r')
+    fr_w_val = safe_get('fr_w')
+
+    # Spouse inputs
+    has_spouse = bool(p.get('spouse'))
+    sp_age_val = safe_get('sp_age')
+    sp_qc_exp_val = safe_get('sp_qc_exp')
+    sp_fr_l_val = safe_get('sp_fr_l')
+    sp_fr_s_val = safe_get('sp_fr_s')
+
     # --- 1. TARGET SELECTION ---
     st.subheader(t("step1"))
     draw_options = [t("manual")] + [f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" for d in scoring.LATEST_DRAWS]
@@ -62,21 +90,29 @@ def render(p, t, scoring):
 
     # --- 3. SIMULATION LOOP ---
     results = []
+
     for y_val in y_vals:
         for x_val in x_vals:
             sim = p.copy()
+
             def apply_sim_logic(key, val):
                 if key == 'time_travel':
                     years_passed = int(val / 12)
-                    sim['age'] = sim['age'] + years_passed
-                    if p['spouse']: sim['sp_age'] = sim['sp_age'] + years_passed
+                    sim['age'] = age_val + years_passed
+                    if has_spouse: sim['sp_age'] = sp_age_val + years_passed
 
-                    sim['qc_exp'] += val
-                    sim['prim_occ_exp'] += val
-                    sim['gen_exp'] += val
-                    if p['spouse']: sim['sp_qc_exp'] += val
-                    if sim['out_res'] > 0: sim['out_res'] += val
-                    if sim['out_work'] > 0: sim['out_work'] += val
+                    sim['qc_exp'] = qc_exp_val + val
+                    sim['prim_occ_exp'] = safe_get('prim_occ_exp') + val
+                    sim['gen_exp'] = exp_val + val
+
+                    if has_spouse: sim['sp_qc_exp'] = sp_qc_exp_val + val
+
+                    curr_out_res = safe_get('out_res')
+                    if curr_out_res > 0: sim['out_res'] = curr_out_res + val
+
+                    curr_out_work = safe_get('out_work')
+                    if curr_out_work > 0: sim['out_work'] = curr_out_work + val
+
                 elif key == 'fr_target':
                     sim['fr_l'] = sim['fr_s'] = sim['fr_r'] = sim['fr_w'] = val
                 elif key == 'sp_fr_target':
@@ -114,52 +150,82 @@ def render(p, t, scoring):
 
     st.plotly_chart(fig, width='stretch')
 
-    # --- 5. SMART AI PROMPT ---
-    st.markdown("### 🤖 Ask AI to Explain")
+    # --- 5. STRATEGY ANALYSIS ---
+    st.markdown("### 🤖 Strategy Analysis")
 
     curr_score, audit = scoring.calculate_score(p)
-    is_sp = p['spouse']
+
+    # Data Pre-processing
+    has_vjo_points = audit.get('qn_vjo', 0) > 0
+    shortage_score = audit.get('qn_diag', 0)
+    has_french_zeros = fr_r_val < 5 or fr_w_val < 5
+    spouse_points = audit.get('ad_fr', 0)
+    spouse_can_improve = has_spouse and (spouse_points < 40)
+    sim_max_score = pivot_df.values.max()
 
     # Audit Max Constants
-    max_age = 100 if is_sp else 120
-    max_edu = 110 if is_sp else 130
-    max_exp = 50 if is_sp else 70
-    max_fr_app = 160 if is_sp else 200
+    max_age = 100 if has_spouse else 120
+    max_edu = 110 if has_spouse else 130
+    max_exp = 50 if has_spouse else 70
+    max_fr_app = 160 if has_spouse else 200
+    max_diag = 120
 
     full_audit = f"""
     **A. HUMAN CAPITAL ({audit['total_hc']} / 520)**
-    - Age: {audit['hc_age']} / {max_age} (Current: {p['age']})
-    - Education: {audit['hc_edu']} / {max_edu} ({p['edu']})
-    - Career Experience: {audit['hc_exp']} / {max_exp} ({p['gen_exp']} months)
-    - French (Applicant): {audit['hc_french']} / {max_fr_app} (L:{p['fr_l']} S:{p['fr_s']} R:{p['fr_r']} W:{p['fr_w']})
+    - Age: {audit['hc_age']} / {max_age} (Current: {age_val})
+    - Education: {audit['hc_edu']} / {max_edu}
+    - Career Experience: {audit['hc_exp']} / {max_exp} ({exp_val} months)
+    - French (Applicant): {audit['hc_french']} / {max_fr_app} (L:{p.get('fr_l')} S:{p.get('fr_s')} R:{fr_r_val} W:{fr_w_val})
 
     **B. QUEBEC NEEDS ({audit['total_qn']} / 700)**
-    - **Job Shortage:** {audit['qn_diag']} / 120 (Diagnosis: {p['diag']})
-    - **Quebec Work History:** {audit['qn_qc_exp']} / 160 ({p['qc_exp']} months)
-    - **Quebec Diploma:** {audit['qn_dip']} / 200 ({p['qc_dip']})
-    - **Validated Job Offer:** {audit['qn_vjo']} / 50 ({p['vjo']})
-    - **Regional Ties:** {audit['qn_out']} / 120 (Months: {p['out_res']})
+    - **Job Shortage:** {shortage_score} / {max_diag} (Diagnosis Points)
+    - **Quebec Work History:** {audit['qn_qc_exp']} / 160 ({qc_exp_val} months)
+    - **Quebec Diploma:** {audit['qn_dip']} / 200
+    - **Validated Job Offer:** {audit['qn_vjo']} / 50 (Locked: {"Yes" if has_vjo_points else "No"})
+    - **Regional Ties:** {audit['qn_out']} / 120
 
     **C. ADAPTATION ({audit['total_ad']} / 180)**
-    - Spouse Points: French {audit.get('ad_fr',0)}/40, Age {audit.get('ad_age',0)}/20, QC Work {audit.get('ad_exp',0)}/30
+    - Spouse Points: French {audit.get('ad_fr',0)}/40, Age {audit.get('ad_age',0)}/20
     """
 
     csv_string = pivot_df.to_csv(sep=",")
 
+    # --- REVISED PROMPT: NUANCED ADVISOR ---
     ai_prompt_text = f"""
 Act as a Senior Quebec Immigration Strategist.
-I am running a simulation to reach a **Target Score of {target_score}** ({target_stream_name}).
+I am running a simulation to reach a **Target Score of {target_score}. Be concise.
 
-Here is my **FULL SCORECARD AUDIT** (Points vs Max Potential):
-{full_audit}
+MY TRUTH DATA:
+1. Validated Job Offer (VJO): {"YES (+50 pts)" if has_vjo_points else "NO"}
+2. Job Shortage Score: {shortage_score} / {max_diag}
+3. French Reading/Writing Zeros: {"YES" if has_french_zeros else "NO"}
+4. Spouse Potential: {"YES" if spouse_can_improve else "NO"}
+5. Simulation Max: {sim_max_score} vs Target: {target_score}
 
-Here is my **SIMULATION MATRIX** (X={x_label_sel}, Y={y_label_sel}, Val=Score):
-{csv_string}
+YOUR MISSION: Analyze Risk vs. Reward (Do not be authoritarian) (Max 250 words).
+Use a professional, advisory tone. Do not use words like "Forbidden," "Stop," or "Non-negotiable."
+Get straight to the point. No fluff. No "I hope this helps."
 
-**YOUR TASK: Find the Missing Points.**
-1. **The "Dead End" Check:** If the simulation max < {target_score}, admit the current path fails.
-2. **The "Strategic Pivot" (Hidden Levers):** Look at the Audit for zeros. Suggest ONE radical change (e.g. Quebec Diploma/AEC, Job Title Arbitrage, VJO) to bridge the gap.
-3. **The Plan:** Summarize Option A (Stay course) vs Option B (Pivot).
+STRATEGIC ANALYSIS FRAMEWORK:
+
+1. The "Administrative" Trade-off (Job Title/NOC)**
+- Scenario: I have a VJO (+50 pts).
+- Analysis: Calculate the *Net Impact* of changing my NOC to chase Shortage points.
+- Logic: "If you change NOC, you likely lose the VJO (-50) to gain Shortage points (+??). Is Shortage > 50? If not, advise that it is a net loss, but acknowledge it is the user's choice to take that risk."
+
+2. The "Efficiency" Calculation (Language)
+- Check Reading/Writing. If Zeros, highlight this as the highest ROI lever (Low Cost / High Points).
+- Check Spouse. If they can improve, highlight that even small gains (Level 4) might bridge the gap.
+
+3. The "Structural" Gap (Education)
+- **Check:** If [Simulation Max < Target] AND [Language Levers are exhausted].
+- **Verdict:** If the math proves I cannot reach the target with Time + French, then (and only then) suggest the Diploma.
+- **Tone:** Present it as an investment decision: "To bridge the final X points, you may need to 'buy' structure via a Diploma ($15k+)."
+
+OUTPUT FORMAT:
+1. **Strategic Diagnosis:** Review the VJO/Shortage trade-off calmly.
+2. **The Efficiency Check:** ROI of Applicant French vs Spouse French.
+3. **The Final Plan:** Step-by-step recommendation prioritizing "Free" points before "Expensive" ones.
 """
 
     encoded_prompt = urllib.parse.quote(ai_prompt_text)
@@ -169,9 +235,9 @@ Here is my **SIMULATION MATRIX** (X={x_label_sel}, Y={y_label_sel}, Val=Score):
     with col_btn:
         st.link_button("🚀 Analyze with ChatGPT", chatgpt_url, type="primary")
     with col_info:
-        st.caption("Click to open ChatGPT with your **Full Scorecard** and **Simulation Data**.")
+        st.caption("Click to open ChatGPT with the **Risk-Calculated Strategy**.")
 
-    with st.expander("Show Raw Prompt", expanded=False):
+    with st.expander("Show Raw Prompt (Debug)", expanded=False):
         st.code(ai_prompt_text, language="text")
 
     st.caption(t("legend"))

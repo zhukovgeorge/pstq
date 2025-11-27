@@ -56,8 +56,8 @@ with st.sidebar:
 
     # --- SECTION 1: APPLICANT ---
     with st.expander(t("sec_applicant"), expanded=True):
-        p_age = st.slider(t("age"), 18, 50, None)
-        p_gen_exp = st.slider(t("exp"), 0, 60, None)
+        p_age = st.slider(t("age"), 18, 50, 0)
+        p_gen_exp = st.slider(t("exp"), 0, 60, 0)
 
         # Education
         edu_order = [
@@ -83,8 +83,8 @@ with st.sidebar:
         p_diag_label = st.selectbox(t("job_diag"), diag_display, index=0)
         p_diag = get_key_from_label(tr.DIAG_MAP, p_diag_label)
 
-        p_prim_occ = st.slider(t("job_prim_exp"), 0, 60, None)
-        p_qc_exp = st.slider(t("job_qc_exp"), 0, 60, None)
+        p_prim_occ = st.slider(t("job_prim_exp"), 0, 60, 0)
+        p_qc_exp = st.slider(t("job_qc_exp"), 0, 60, 0)
 
         vjo_keys = ['None', 'Inside Montreal', 'Outside Montreal']
         vjo_display = [get_label(tr.VJO_MAP, k) for k in vjo_keys]
@@ -104,9 +104,9 @@ with st.sidebar:
         p_qc_dip = get_key_from_label(tr.QC_DIP_MAP, p_qc_dip_label)
 
         st.caption(t("reg_ties"))
-        p_out_res = st.slider(t("reg_res"), 0, 60, None)
-        p_out_work = st.slider(t("reg_work"), 0, 60, None)
-        p_out_study = st.slider(t("reg_study"), 0, 60, None)
+        p_out_res = st.slider(t("reg_res"), 0, 60, 0)
+        p_out_work = st.slider(t("reg_work"), 0, 60, 0)
+        p_out_study = st.slider(t("reg_study"), 0, 60, 0)
 
     # --- SECTION 3: SPOUSE ---
     with st.expander(t("sec_spouse"), expanded=False):
@@ -114,14 +114,14 @@ with st.sidebar:
 
         if p_spouse:
             col1, col2 = st.columns(2)
-            sp_age = col1.slider(t("sp_age"), 18, 50, None)
+            sp_age = col1.slider(t("sp_age"), 18, 50, 0)
 
             sp_keys = ['PhD', 'Masters', 'Bachelors', 'Tech Diploma', 'High School', 'None']
             sp_edu_display = [get_label(tr.EDU_MAP, k) for k in sp_keys]
             sp_edu_label = col2.selectbox(t("sp_edu"), sp_edu_display, index=None)
             sp_edu = get_key_from_label(tr.EDU_MAP, sp_edu_label)
 
-            sp_qc_exp = st.slider(t("sp_qc_exp"), 0, 60, None)
+            sp_qc_exp = st.slider(t("sp_qc_exp"), 0, 60, 0)
 
             st.caption(t("sp_fr"))
             c1, c2 = st.columns(2)
