@@ -4,6 +4,70 @@ import plotly.express as px
 import urllib.parse
 import translations as tr
 
+def generate_scoring_cheat_sheet(scoring, has_spouse):
+    """
+    Generates a concise, numeric text representation of the scoring grid for the LLM.
+    """
+    # 1. FRENCH GRID
+    if has_spouse:
+        fr_txt = (
+            "FRENCH (Principal - WITH SPOUSE): "
+            "Lvl 5-6: 30pts | Lvl 7-8: 35pts | Lvl 9-10: 38pts. (Jumping 0->5 is +30pts)."
+        )
+        sp_fr_txt = (
+            "FRENCH (Spouse): "
+            "Lvl 5-6: 6pts | Lvl 7-8: 8pts | Lvl 9-12: 10pts. (Oral Only)."
+        )
+        # WITH SPOUSE NUMBERS
+        gen_exp_txt = "WORK EXP (General): 12m: 15pts | 24m: 30pts | 36m: 35pts | 48m+: 50pts."
+        # Education Gaps (Critical for Strategy)
+        edu_txt = (
+            "EDUCATION (Spouse Scale): "
+            "Masters: 91pts | Bachelors: 87pts | 2-Year Tech: 74pts | High School: 24pts. "
+            "(Note: Masters vs Bachelor is only +4pts difference)."
+        )
+    else:
+        fr_txt = (
+            "FRENCH (Principal - SINGLE): "
+            "Lvl 5-6: 33pts | Lvl 7-8: 39pts | Lvl 9-10: 44pts. (Jumping 0->5 is +33pts)."
+        )
+        sp_fr_txt = "FRENCH (Spouse): N/A"
+        # SINGLE NUMBERS
+        gen_exp_txt = "WORK EXP (General): 12m: 30pts | 24m: 60pts | 36m: 70pts | 48m+: 100pts."
+        # Education Gaps
+        edu_txt = (
+            "EDUCATION (Single Scale): "
+            "Masters: 104pts | Bachelors: 99pts | 2-Year Tech: 84pts | High School: 38pts. "
+            "(Note: Masters vs Bachelor is only +5pts difference)."
+        )
+
+    # 2. QUEBEC SPECIFIC HISTORY (Cumulative)
+    qc_exp_txt = (
+        "QUEBEC WORK HISTORY (Cumulative): "
+        "12m: 40pts | 24m: 80pts | 36m: 120pts | 48m+: 160pts. "
+        "(This stacks with General Experience)."
+    )
+
+    # 3. SHORTAGE (DIAGNOSIS) - PRECISE
+    shortage_txt = (
+        "SHORTAGE JOB (Deficit Diagnosis): "
+        "12m: 90pts | 24m: 100pts | 36m: 110pts | 48m+: 120pts."
+    )
+
+    # 4. REGIONAL TIES & OTHER
+    # Break down the 120 points so AI sees it scales with time
+    misc_txt = (
+        "REGIONAL TIES (Outside Montreal): Max 120pts. "
+        "Accumulates via Residence (Max 40), Work (Max 60), Study (Max 20). "
+        "VJO: Outside MTL = 50pts | Inside MTL = 30pts. "
+        "REGULATED LICENSE: Flat 50pts."
+    )
+
+    # 5. NUCLEAR OPTION (Diploma)
+    dip_txt = "QUEBEC DIPLOMA (>900h trade): Adds approx +60 to +80 pts depending on field."
+
+    return f"{fr_txt}\n{sp_fr_txt}\n{gen_exp_txt}\n{qc_exp_txt}\n{shortage_txt}\n{edu_txt}\n{misc_txt}\n{dip_txt}"
+
 def render(p, t, scoring):
     st.header(t("sim_title"))
     st.markdown("""
@@ -257,89 +321,176 @@ def render(p, t, scoring):
         3.  **Apply Language Target:** We **replace** your current French test results with the level selected on the axis.
         """)
 
-    # --- 5. STRATEGY ANALYSIS ---
-    st.markdown("### Strategy Analysis")
 
+# --- 5. STRATEGY & TIMING ANALYSIS ---
+    st.markdown("### ⏳ Strategic Timing & Analysis")
+
+    # ---------------------------------------------------------
+    # 0. INITIALIZE DATA
+    # ---------------------------------------------------------
     curr_score, audit = scoring.calculate_score(p)
+    has_spouse = bool(p.get('spouse'))
 
-    # Data Pre-processing
-    has_vjo_points = audit.get('qn_vjo', 0) > 0
-    shortage_score = audit.get('qn_diag', 0)
-    has_french_zeros = fr_r_val < 5 or fr_w_val < 5
-    spouse_points = audit.get('ad_fr', 0)
-    spouse_can_improve = has_spouse and (spouse_points < 40)
-    sim_max_score = pivot_df.values.max()
+    # ---------------------------------------------------------
+    # A. TIMING CALCULATIONS & PROJECTIONS
+    # ---------------------------------------------------------
+    max_score_row = df_sim.loc[df_sim['score'].idxmax()]
+    max_score_val = max_score_row['score']
+    months_to_peak = max_score_row['x']
+    peak_date_str = max_score_row.get('date', 'N/A')
 
-    # Audit Max Constants
-    max_age = 100 if has_spouse else 120
-    max_edu = 110 if has_spouse else 130
-    max_exp = 50 if has_spouse else 70
-    max_fr_app = 160 if has_spouse else 200
-    max_diag = 120
+    # [NEW] GENERATE FUTURE MATRIX & TRACK GLOBAL MAX
+    # We need to know the absolute best possible score (Max Time + Max French)
+    # to decide if we should tell the AI to "Protect VJO" or "Burn the Ships".
 
-    full_audit = f"""
-    **A. HUMAN CAPITAL ({audit['total_hc']} / 520)**
-    - Age: {audit['hc_age']} / {max_age} (Current: {age_val})
-    - Education: {audit['hc_edu']} / {max_edu}
-    - Career Experience: {audit['hc_exp']} / {max_exp} ({exp_val} months)
-    - French (Applicant): {audit['hc_french']} / {max_fr_app} (L:{p.get('fr_l')} S:{p.get('fr_s')} R:{fr_r_val} W:{fr_w_val})
+    milestones = [12, 24, 36, 48, 60]
+    projection_lines = []
+    global_max_projected = 0 # Track the highest number seen in the matrix
 
-    **B. QUEBEC NEEDS ({audit['total_qn']} / 700)**
-    - **Job Shortage:** {shortage_score} / {max_diag} (Diagnosis Points)
-    - **Quebec Work History:** {audit['qn_qc_exp']} / 160 ({qc_exp_val} months)
-    - **Quebec Diploma:** {audit['qn_dip']} / 200
-    - **Validated Job Offer:** {audit['qn_vjo']} / 50 (Locked: {"Yes" if has_vjo_points else "No"})
-    - **Regional Ties:** {audit['qn_out']} / 120
+    for m in milestones:
+        data_at_m = df_sim[df_sim['x'] == m]
+        if not data_at_m.empty:
+            low_score = int(data_at_m['score'].min())
+            high_score = int(data_at_m['score'].max())
 
-    **C. ADAPTATION ({audit['total_ad']} / 180)**
-    - Spouse Points: French {audit.get('ad_fr',0)}/40, Age {audit.get('ad_age',0)}/20
+            # Update global max
+            if high_score > global_max_projected:
+                global_max_projected = high_score
+
+            if low_score == high_score:
+                projection_lines.append(f"- Month {m}: Guaranteed {low_score} pts (Time Only)")
+            else:
+                projection_lines.append(f"- Month {m}: {low_score} pts (Time Only) ...up to... {high_score} pts (Time + Max French)")
+
+    projection_text = "\n".join(projection_lines)
+
+    # Check if the VJO will expire before the peak (18 month validity)
+    vjo_will_expire = (audit.get('qn_vjo', 0) == 50) and (months_to_peak > 18)
+
+    # ---------------------------------------------------------
+    # B. DISPLAY TIMELINE & WARNINGS
+    # ---------------------------------------------------------
+    col_peak, col_action = st.columns(2)
+    with col_peak:
+        st.success(f"**📈 Your Peak Score: {max_score_val}**")
+        st.write(f"This occurs in **{months_to_peak} months** ({peak_date_str}).")
+    with col_action:
+        import pandas as pd
+        today = pd.Timestamp.now()
+        if isinstance(months_to_peak, (int, float)) and months_to_peak > 3:
+            deadline = today + pd.DateOffset(months=months_to_peak - 3)
+            st.info(f"**📝 Language Test Deadline: {deadline.strftime('%b %Y')}**")
+        else:
+            st.info("**📝 Language Test Deadline: ASAP**")
+
+    if vjo_will_expire:
+        st.error("⚠️ **Warning:** Your peak score is in >18 months. You will need to renew your VJO.")
+
+    st.divider()
+
+    # ---------------------------------------------------------
+    # C. PREPARE AI PROMPT
+    # ---------------------------------------------------------
+
+    # 1. Define Maximums
+    m_age = 100 if has_spouse else 120
+    m_edu = 110 if has_spouse else 130
+    m_exp = 50  if has_spouse else 70
+    m_fr  = 160 if has_spouse else 200
+    m_diag = 120; m_qc = 160; m_vjo = 50; m_reg = 120
+    m_auth = 50
+    m_sp_fr = 40; m_sp_age = 20; m_sp_edu = 20
+
+    # 2. Glassbox Rules
+    scoring_rules_text = generate_scoring_cheat_sheet(scoring, has_spouse)
+
+    # 3. Detailed Scorecard
+    detailed_breakdown = f"""
+    [A] HUMAN CAPITAL ({audit.get('total_hc', 0)} / 520)
+    - Age: {audit.get('hc_age', 0)} / {m_age} pts
+    - Education: {audit.get('hc_edu', 0)} / {m_edu} pts
+    - Experience: {audit.get('hc_exp', 0)} / {m_exp} pts ({p.get('gen_exp')} months)
+    - French (Main): {audit.get('hc_french', 0)} / {m_fr} pts
+      (Levels: L{p.get('fr_l')}/S{p.get('fr_s')}/R{p.get('fr_r')}/W{p.get('fr_w')})
+
+    [B] QUEBEC NEEDS ({audit.get('total_qn', 0)} / 700)
+    - Shortage Job: {audit.get('qn_diag', 0)} / {m_diag} pts
+    - QC Work History: {audit.get('qn_qc_exp', 0)} / {m_qc} pts ({p.get('qc_exp')} months)
+    - VJO (Offer): {audit.get('qn_vjo', 0)} / {m_vjo} pts
+    - Regulated License (Auth): {audit.get('qn_auth', 0)} / {m_auth} pts
+    - Regional Ties: {audit.get('qn_out', 0)} / {m_reg} pts
+
+    [C] SPOUSE / ADAPTATION ({audit.get('total_ad', 0)} / 180)
+    - Spouse French: {audit.get('ad_fr', 0)} / {m_sp_fr} pts (Levels: L{p.get('sp_fr_l')}/S{p.get('sp_fr_s')})
     """
 
-    csv_string = pivot_df.to_csv(sep=",")
+    # 4. Dynamic Instructions (Logic Branching)
+    strategy_instructions = []
 
-    # --- REVISED PROMPT: NUANCED ADVISOR ---
+    # [JOB & VJO LOGIC - THE CRITICAL FIX]
+    # We compare the Global Max Projected Score against the Target.
+    # If Max < Target, we stop being conservative and start being aggressive.
+
+    if audit.get('qn_vjo', 0) == 50:
+        if global_max_projected >= target_score:
+            # SCENARIO A: Safe. The VJO is helping us win. Keep it.
+            strategy_instructions.append("- VJO STATUS: I have a VJO and my projected score meets the target. Emphasize protecting this VJO (do not switch jobs risking it).")
+        else:
+            # SCENARIO B: Stuck. The VJO is not enough. We must switch.
+            strategy_instructions.append("- VJO STATUS: I have a VJO, but my path FAILS even with it (Max Score < Target). Do NOT blindly protect it. I MUST switch to a Shortage Job to bridge the gap. Assume I will secure a new VJO in the new role.")
+            strategy_instructions.append("- STRATEGY CHANGE: Prioritize 'Switching to Shortage NOC' as the #1 Move.")
+    else:
+        # User has no VJO
+        if audit.get('qn_diag', 0) >= 90:
+             strategy_instructions.append("- JOB STATUS: I already have a Deficit Job. Focus on 'Time in Job' and getting a VJO for this job.")
+        else:
+             strategy_instructions.append("- JOB STATUS: My job is not scoring high. Is switching NOCs worth the risk?")
+             strategy_instructions.append("- VJO: I have 0/50. Is getting a VJO the fastest way to get 50 pts?")
+
+    # [French Logic]
+    strategy_instructions.append("- FRENCH ADVICE: Focus ONLY on big jumps (0 to 5) for me. Do NOT suggest going from 7 to 8 (too much effort, low ROI).")
+
+    # [License Logic]
+    strategy_instructions.append("- LICENSE CHECK: Only suggest getting a License/Auth if the job is traditionally regulated (Health, Teaching, Engineering). If the job is IT, Tech, or Business, IGNORE this category (assume N/A).")
+
+    # [Diploma Logic]
+    strategy_instructions.append("- DIPLOMA LOGIC: If you suggest a Diploma, you MUST calculate the Opportunity Cost (Lost Work History points vs Diploma points).")
+
+    formatted_instructions = "\n".join(strategy_instructions)
+
+    # 5. Final Prompt
     ai_prompt_text = f"""
-    Act as a Senior Quebec Immigration Strategist.
-    I am running a simulation to reach a **Target Score of {target_score}. Be concise.
+Act as a Ruthless Quebec Immigration Strategist.
+I am running a simulation to reach a Target Score of {target_score}.
 
-    MY TRUTH DATA:
-    1. Validated Job Offer (VJO): {"YES (+50 pts)" if has_vjo_points else "NO"}
-    2. Job Shortage Score: {shortage_score} / {max_diag}
-    3. French Reading/Writing Zeros: {"YES" if has_french_zeros else "NO"}
-    4. Spouse Potential: {"YES" if spouse_can_improve else "NO"}
-    5. Simulation Max: {sim_max_score} vs Target: {target_score}
+Below is my DETAILED SCORECARD.
 
-    YOUR MISSION: Analyze Risk vs. Reward (Do not be authoritarian) (Max 250 words).
-    Use a professional, advisory tone. Do not use words like "Forbidden," "Stop," or "Non-negotiable."
-    Get straight to the point. No fluff. No "I hope this helps."
+{detailed_breakdown}
 
-    STRATEGIC ANALYSIS FRAMEWORK:
-    1. The "Administrative" Trade-off (Job Title/NOC)
-    2. The "Efficiency" Calculation (Language)
-    3. The "Structural" Gap (Education)
+FUTURE SCENARIO MATRIX (Rows = French Level, Cols = Months Passed):
+{projection_text}
 
-    OUTPUT FORMAT:
-    1. **Strategic Diagnosis**
-    2. **The Efficiency Check**
-    3. **The Final Plan**
-    """
+OFFICIAL SCORING REFERENCE (Use this for math):
+{scoring_rules_text}
+
+YOUR INSTRUCTIONS (Follow Strictly):
+{formatted_instructions}
+
+OUTPUT FORMAT (No intro, no fluff):
+1. THE DIAGNOSIS: Why am I stuck? (1 sentence)
+2. THE HIGH-ROI MOVES: List specific actions. Use the FUTURE SCENARIO MATRIX to check if "Time Only" is enough to reach the target.
+3. THE VERDICT: Start with "YES" or "NO". Then, summarize the *exact combination* required.
+   (Example: "YES: The Matrix shows that Month 24 (Time Only) reaches 780 pts, which exceeds your target. No study needed.")
+"""
 
     encoded_prompt = urllib.parse.quote(ai_prompt_text)
     chatgpt_url = f"https://chatgpt.com/?q={encoded_prompt}"
-
-    # --- DISCLAIMER WARNING ---
-    st.warning("""
-    **⚠️ READ BEFORE CLICKING:**
-    * **AI Hallucinations:** ChatGPT can make mistakes or invent facts. **Do not rely on this analysis alone.**
-    * **Unofficial Logic:** This prompt is based on the developer's general understanding of the process. It does not know your exact legal situation or nuances.
-    * **Your Responsibility:** You must critically analyze the AI's advice and make your own decisions. This tool is for brainstorming, not legal advice.
-    """)
 
     col_btn, col_info = st.columns([1, 2])
     with col_btn:
         st.link_button("🚀 Analyze with ChatGPT", chatgpt_url, type="primary")
     with col_info:
-        st.caption("Click to open ChatGPT with the **Risk-Calculated Strategy**.")
+        st.caption("Click to open ChatGPT with the **Strict ROI Analysis**.")
 
     with st.expander("Show Raw Prompt (Debug)", expanded=False):
         st.code(ai_prompt_text, language="text")
