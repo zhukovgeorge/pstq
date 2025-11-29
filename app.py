@@ -29,7 +29,7 @@ def get_key_from_label(category_map, label):
 # --- CSS ---
 st.markdown("""
     <style>
-    .block-container {padding-top: 1rem; padding-bottom: 1rem;}
+    .block-container {padding-top: 2rem; padding-bottom: 1rem;}
     div[data-testid="stExpander"] div[role="button"] p {font-size: 1.1rem; font-weight: bold;}
     </style>
 """, unsafe_allow_html=True)
