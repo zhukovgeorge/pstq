@@ -59,6 +59,63 @@ AXIS_MAP_LABELS = {
     "sp_fr_target": {"en": "Spouse French Target (All Skills)", "fr": "Cible Français (Conjoint)"}
 }
 
+JOB_DIAG_VALUE_MAP = {
+    # note: exact accents + lowercase "déficit" / "surplus"
+    "Déficit":        {"en": "Deficit",        "fr": "Déficit"},
+    "Léger déficit":  {"en": "Slight deficit", "fr": "Léger déficit"},
+    "Équilibre":      {"en": "Balanced",       "fr": "Équilibre"},
+    "Léger surplus":  {"en": "Slight surplus", "fr": "Léger surplus"},
+    "Surplus":        {"en": "Surplus",        "fr": "Surplus"},
+    "Non publié":     {"en": "Not published",  "fr": "Non publié"},
+}
+
+
+# translations.py
+
+JOB_CAT_VALUE_MAP = {
+    "Legislative and senior management occupations": {
+        "en": "Legislative and senior management occupations",
+        "fr": "Professions législatives et de haute direction",
+    },
+    "Business, finance and administration occupations": {
+        "en": "Business, finance and administration occupations",
+        "fr": "Professions en affaires, finance et administration",
+    },
+    "Natural and applied sciences and related occupations": {
+        "en": "Natural and applied sciences and related occupations",
+        "fr": "Professions en sciences naturelles et appliquées et domaines connexes",
+    },
+    "Health occupations": {
+        "en": "Health occupations",
+        "fr": "Professions des soins de santé",
+    },
+    "Occupations in education, law and social, community and government services": {
+        "en": "Occupations in education, law and social, community and government services",
+        "fr": "Professions en éducation, droit, services sociaux, communautaires et gouvernementaux",
+    },
+    "Occupations in art, culture, recreation and sport": {
+        "en": "Occupations in art, culture, recreation and sport",
+        "fr": "Professions dans les arts, la culture, les loisirs et les sports",
+    },
+    "Sales and service occupations": {
+        "en": "Sales and service occupations",
+        "fr": "Professions en vente et services",
+    },
+    "Trades, transport and equipment operators and related occupations": {
+        "en": "Trades, transport and equipment operators and related occupations",
+        "fr": "Métiers, transport, opérateurs d’équipement et professions connexes",
+    },
+    "Natural resources, agriculture and related production occupations": {
+        "en": "Natural resources, agriculture and related production occupations",
+        "fr": "Professions des ressources naturelles, de l’agriculture et de la production connexe",
+    },
+    "Occupations in manufacturing and utilities": {
+        "en": "Occupations in manufacturing and utilities",
+        "fr": "Professions de la fabrication et des services publics",
+    },
+}
+
+
 # ==========================================
 # 2. GENERAL UI TEXT
 # ==========================================
@@ -109,6 +166,25 @@ TEXTS = {
         "tab_job": "🕵️ Job Search",
         "tab_ref": "📚 Official Scoring Grids",
         "tab_contact": "📬 Contact",
+
+        # Job Search Tab
+                # Job Search Tab
+        "job_subheader": (
+            "**Goal:** Identify if your profession is in **Deficit** (High Points).\n"
+            "*Data Source: Official Govt. Diagnostics*"
+        ),
+        "job_search_placeholder": "e.g. Software, 21232",
+        "job_filter_category": "Category",
+        "job_filter_diagnosis": "Diagnosis",
+
+        "job_col_noc": "NOC Code",
+        "job_col_title": "Job Title",
+        "job_col_diag": "Diagnosis",
+        "job_col_cat": "Category",
+        "job_stats_deficit": "Total Deficit Professions",
+        "job_stats_deficit_delta": "High Priority Targets",
+        "job_matches": "Showing **{n}** matches:",
+        "job_cat_chart_title": "Distribution of Jobs by Category (Filtered)",
 
         # Dashboard
         "hc": "Human Capital",
@@ -227,6 +303,26 @@ TEXTS = {
         "tab_job": "🕵️ Recherche d'Emploi",
         "tab_ref": "📚 Grilles Officielles",
         "tab_contact": "📬 Contact",
+
+        # Job Search Tab
+        "job_subheader": (
+            "**Objectif :** Vérifier si votre profession est en **déficit** (fort potentiel de points).\n"
+            "*Source de données : diagnostics gouvernementaux officiels*"
+        ),
+        "job_search_placeholder": "ex. Informatique, 21232",
+        "job_filter_category": "Catégorie",
+        "job_filter_diagnosis": "Diagnostic",
+
+        "job_col_noc": "Code CNP",
+        "job_col_title": "Titre d’emploi",
+        "job_col_diag": "Diagnostic",
+        "job_col_cat": "Catégorie",
+        "job_stats_deficit": "Total des professions en déficit",
+        "job_stats_deficit_delta": "Professions hautement prioritaires",
+        "job_matches": "Affichage de **{n}** résultats :",
+        "job_cat_chart_title": "Répartition des emplois par catégorie (filtre appliqué)",
+
+
 
         # Dashboard
         "hc": "Capital Humain",

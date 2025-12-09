@@ -169,7 +169,7 @@ t1, t2, t3, t4, t5, t6, t7 = st.tabs([
 
 with t1: dashboard.render(profile, total_score, audit_log, t)
 with t2: simulator.render(profile, t, scoring)
-with t3: job_search.render()
+with t3: job_search.render(t)
 with t4: draws.render(scoring.LATEST_DRAWS, t)
 with t5: french.render(t)
 with t6: reference.render(t, scoring, tr)
