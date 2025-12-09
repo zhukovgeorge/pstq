@@ -53,7 +53,7 @@ def render():
             "NOC": st.column_config.TextColumn("Code", width="small"),
             "Title": "Job Title",
             "Diagnosis": st.column_config.TextColumn("Status", width="medium"),
-            "Category": st.column_config.TextColumn("Sector", width="medium"),
+            "Category": st.column_config.TextColumn("Category", width="medium"),
         },
         hide_index=True
     )
