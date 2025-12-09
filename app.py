@@ -1,6 +1,7 @@
 import streamlit as st
 import translations as tr
 import logic.scoring as scoring
+from datetime import datetime
 
 # Import the UI Tabs
 from tabs import dashboard, simulator, job_search, draws, french, reference, contact
@@ -11,7 +12,7 @@ from tabs import dashboard, simulator, job_search, draws, french, reference, con
 st.set_page_config(page_title="Quebec PSTQ Calc", layout="wide", initial_sidebar_state="expanded")
 
 if 'lang' not in st.session_state:
-    st.session_state.lang = 'en'
+    st.session_state.lang = 'fr'
 
 # --- HELPER FUNCTIONS ---
 def t(key):
@@ -41,10 +42,10 @@ with st.sidebar:
     def update_language():
         st.session_state.lang = 'fr' if st.session_state.lang_choice == "Français" else 'en'
 
-    curr_index = 0 if st.session_state.lang == 'en' else 1
+    curr_index = 0 if st.session_state.lang == 'fr' else 1
     st.radio(
         label=t("lang_select"),
-        options=["English", "Français"],
+        options=["Français", "English"],
         index=curr_index,
         horizontal=True,
         key="lang_choice",
@@ -181,7 +182,7 @@ with t7: contact.render(t)
 st.divider()
 
 # You can manually update this date whenever you change the scoring logic
-last_update_date = "27 Novembre 2025"
+last_update_date = datetime.today().strftime('%Y-%m-%d')
 
 st.markdown(f"""
 <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #dc3545; font-size: 0.8rem; color: #495057; margin-top: 20px; margin-bottom: 20px;'>

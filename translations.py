@@ -124,7 +124,7 @@ TEXTS = {
     "en": {
         "app_title": "🍁 Quebec PSTQ Simulator",
         "app_subtitle": "Interactive score calculator for the *Regular Skilled Worker Program*.",
-        "lang_select": "Language / Langue",
+        "lang_select": "Langue / ",
 
         # Sidebar
         "sb_title": "1. Profile Setup",
@@ -261,7 +261,7 @@ TEXTS = {
     "fr": {
         "app_title": "🍁 Simulateur PSTQ Québec",
         "app_subtitle": "Calculateur interactif pour le *Programme régulier des travailleurs qualifiés*.",
-        "lang_select": "Language / Langue",
+        "lang_select": "Langue / Language",
 
         # Sidebar
         "sb_title": "1. Configuration du Profil",
@@ -271,11 +271,11 @@ TEXTS = {
         "age": "Âge",
         "edu": "Éducation",
         "exp": "Expérience Totale (Mois)",
-        "fr_skills": "Compétences Français (Échelle québécoise Level 1-12)",
-        "list": "Écoute",
-        "speak": "Parler",
-        "read": "Lecture",
-        "write": "Écriture",
+        "fr_skills": "Français (Échelle Québécoise Niveaux 1-12)",
+        "list": "Compréhension Orale",
+        "speak": "Production Orale",
+        "read": "Compréhension Écrite",
+        "write": "Production Écrite",
 
         "job_diag": "Diagnostic de l'emploi (Pénurie)",
         "job_prim_exp": "Exp. dans l'emploi en pénurie (Mois)",
