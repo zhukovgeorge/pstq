@@ -8,6 +8,26 @@ import logic.scoring as scoring
 
 AVG_SCORE = int(round(compute_avg_score(scoring.LATEST_DRAWS)))
 
+def _peq_threshold_met(sim: dict) -> bool:
+    """
+    Very simplified PEQ-style check (historical, for comparison only):
+    - >= 24 months of Quebec work experience
+    - French oral level (L/S) >= 7
+    """
+    def to_int(v):
+        try:
+            return int(v or 0)
+        except Exception:
+            return 0
+
+    qc_months = to_int(sim.get("qc_exp", 0))
+    fr_l = to_int(sim.get("fr_l", 0))
+    fr_s = to_int(sim.get("fr_s", 0))
+    oral_level = min(fr_l, fr_s)
+
+    return qc_months >= 24 and oral_level >= 7
+
+
 def generate_scoring_cheat_sheet(scoring, has_spouse):
     """
     Generates a concise, numeric text representation of the scoring grid for the LLM.
@@ -228,18 +248,41 @@ def render(p, t, scoring):
 
             score, _ = scoring.calculate_score(sim)
 
+            peq = _peq_threshold_met(sim)
+
             # SAVE DATA
             results.append({
                 "x": x_val,
                 "y": y_val,
                 "score": score,
-                "age": sim.get('age', age_val), # Save the simulated age
-                "date": date_str                # Save the calculated date
+                "age": sim.get('age', age_val),   # simulated age
+                "date": date_str,                 # simulated date
+                "months": months_passed,          # how many months in the future
+                "peq": peq,                       # PEQ eligibility flag
             })
+
 
     # --- 4. VISUALIZATION ---
     # 1. CREATE DATAFRAME & TEXT
     df_sim = pd.DataFrame(results)
+
+    # By default: label = score as text
+    df_sim["score_label"] = df_sim["score"].astype(str)
+
+    # Find the earliest point where PEQ threshold is met
+    eligible = df_sim[df_sim["peq"]]
+
+    if not eligible.empty:
+        # Row index of earliest eligibility (smallest 'months')
+        first_idx = eligible["months"].idxmin()
+        # Add a star only there
+        df_sim.loc[first_idx, "score_label"] = df_sim.loc[first_idx, "score_label"] + "★"
+
+    # Tooltip text can still mention PEQ status (optional)
+    df_sim["peq_text"] = df_sim["peq"].apply(
+        lambda v: "✅ PEQ-style threshold met (historical program)"
+                if v else "❌ PEQ-style threshold not met"
+    )
 
     df_sim["tooltip"] = df_sim.apply(
         lambda row: (
@@ -247,14 +290,19 @@ def render(p, t, scoring):
             f"<b>{x_label_sel}: {row['x']}</b><br><br>"
             f"<b>📅 Date: {row.get('date', 'N/A')}</b><br>"
             f"<b>🎂 Age: {row.get('age', 'N/A')}</b><br>"
-            f"<b>🏆 Score: {row['score']}</b>"
+            f"<b>🏆 Score: {row['score']}</b><br>"
+            f"{row['peq_text']}"
         ),
         axis=1
     )
 
+
+
     # 2. PREPARE DATA
     pivot_df = df_sim.pivot(index="y", columns="x", values="score").sort_index()
     p_tooltip = df_sim.pivot(index="y", columns="x", values="tooltip").sort_index()
+    p_text = df_sim.pivot(index="y", columns="x", values="score_label").sort_index()
+
 
     # 3. COLOR LOGIC (Gradient Red -> Static Green)
     min_val = pivot_df.min().min()
@@ -294,11 +342,13 @@ def render(p, t, scoring):
 
     # 5. UPDATE TRACES
     fig.update_traces(
-        text=pivot_df.values,
+        text=p_text.values,
         texttemplate="%{text}",
         customdata=p_tooltip.values.tolist(),
         hovertemplate="%{customdata}<extra></extra>"
     )
+
+
 
     # 6. LAYOUT
     fig.update_layout(
@@ -310,6 +360,12 @@ def render(p, t, scoring):
     )
 
     st.plotly_chart(fig, width='stretch')
+    st.caption(
+    "A cell marked with ★ is a point where a simplified PEQ-style threshold "
+    "(≥24 months of Quebec work + French oral level ≥7) would be met. "
+    "PEQ is currently closed; this marker is for historical comparison only."
+    )
+
 
     # --- 5. EXPLANATION FORMULA ---
     st.markdown("### 📐 How is this calculated?")
