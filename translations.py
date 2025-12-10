@@ -303,7 +303,7 @@ TEXTS = {
         "tab_draws": "📜 Derniers Tirages",
         "tab_lang": "🌐 Convertisseur Français",
         "tab_job": "🕵️ Recherche d'Emploi",
-        "tab_ref": "📚 Grilles Officielles",
+        "tab_ref": "📚 Pointage Criteries",
         "tab_contact": "📬 Contact",
 
         # Job Search Tab
