@@ -8,6 +8,171 @@ import logic.scoring as scoring
 
 AVG_SCORE = int(round(compute_avg_score(scoring.LATEST_DRAWS)))
 
+
+def build_hard_rules(stream_name: str) -> str:
+    stream_name_lower = stream_name.lower()
+    hard_rules = []
+
+    # STREAM 1 – Highly qualified and specialized skills
+    if "stream 1" in stream_name_lower:
+        hard_rules.append(
+            "- STREAM 1 (Highly qualified and specialized skills): You may be eligible "
+            "ONLY if ALL of the following are true:\n"
+            "  • Your main occupation is classified as FEER 0, 1 or 2.\n"
+            "  • You have at least 12 months of full-time or equivalent PAID work "
+            "experience in this main occupation, in Québec or outside Québec, within "
+            "the last 5 years. Work done as compulsory internships as part of a degree "
+            "program can count toward this, but for a maximum of 3 months.\n"
+            "  • You have obtained a diploma that directly leads to the practice of a "
+            "profession, from a program of at least 1 year of full-time studies (for "
+            "example: DEP/ASP, AEC/DEC technical, or a university certificate, minor, "
+            "major, bachelor’s, DESS, master’s or doctorate), and this diploma was "
+            "obtained BEFORE submitting your application.\n"
+            "  • You have French oral knowledge at level 7 or higher (L7/S7+) and "
+            "written knowledge at level 5 or higher (W5+) according to the Québec "
+            "scale.\n"
+            "  • If you have an accompanying spouse, they have spoken French (Speaking and Listening) at level 4 "
+            "or higher on the Québec scale.\n"
+            "  • If your occupation normally requires a licence to practise in Québec, "
+            "you either already hold this licence or can work in a context where the "
+            "licence is not required. Otherwise, you belong under Stream 3 (regulated "
+            "professions), not Stream 1.\n"
+            "If ANY of these conditions are not met, you MUST say I am not eligible for "
+            "Stream 1 yet and focus on specific actions to reach the missing thresholds "
+            "(e.g. gaining more paid experience, reaching French level 7/5, completing "
+            "the required diploma, or resolving licence issues)."
+        )
+
+    # STREAM 2 – Intermediate and manual skills
+    elif "stream 2" in stream_name_lower:
+        hard_rules.append(
+            "- STREAM 2 (Intermediate and manual skills): You may be eligible ONLY if "
+            "ALL of the following are true:\n"
+            "  • Your main occupation is classified as FEER 3, 4 or 5.\n"
+            "  • You have at least 24 months (2 years) of PAID full-time or equivalent "
+            "work experience in your main occupation within the last 5 years.\n"
+            "    - At least 12 months of this experience are in Québec in the main "
+            "occupation.\n"
+            "    - Up to 12 months may be outside Québec, in your main occupation or in "
+            "an occupation in the same broad NOC category (same first digit of the NOC).\n"
+            "    - Compulsory internships as part of a degree program can be counted "
+            "for a maximum of 3 months. Internships in Québec must be in the main "
+            "occupation; internships outside Québec may be in the main occupation or in "
+            "an occupation in the same broad NOC category.\n"
+            "  • You meet the schooling requirement with at least ONE of the following:\n"
+            "    - A diploma equivalent to a Québec high school diploma; OR\n"
+            "    - A diploma from a full-time program of at least 1 year that corresponds "
+            "in Québec to: a Diploma of Vocational Studies (DEP), an Attestation of "
+            "Vocational Specialization (ASP), or an Attestation of College Studies (AEC).\n"
+            "    - If your diploma was obtained in Québec: the program is at least "
+            "600 hours at secondary level or 900 hours at college level.\n"
+            "    - The diploma was obtained BEFORE submitting your application.\n"
+            "  • You have spoken French (Speaking and Listening) at level 5 or higher (L5/S5+) on the Québec "
+            "scale.\n"
+            "  • If you have an accompanying spouse, they have spoken French (Speaking and Listening) at level 4 "
+            "or higher on the Québec scale.\n"
+            "  • If your occupation normally requires a licence to practise in Québec, "
+            "you either already hold this licence or can work in a context where the "
+            "licence is not required. Otherwise, you belong under Stream 3 (regulated "
+            "professions), not Stream 2.\n"
+            "If ANY of these conditions are not met, you MUST say I am not eligible for "
+            "Stream 2 yet and prioritize actions to reach the missing thresholds "
+            "(e.g. 24 months paid experience with ≥12 in Québec, spoken French (Speaking and Listening) level 5, "
+            "and the required diploma)."
+        )
+
+    # STREAM 3 – Regulated professions
+    elif "stream 3" in stream_name_lower:
+        hard_rules.append(
+            "- STREAM 3 (Regulated professions): You may be eligible ONLY if ALL of the "
+            "following are true:\n"
+            "  • Your main occupation is included in the official List of Regulated "
+            "Professions of the Ministère.\n"
+            "    - If the occupation is FULLY regulated (all associated jobs regulated "
+            "in Québec), you MUST go through Stream 3.\n"
+            "    - If the occupation is NON-fully regulated (only some associated jobs "
+            "are regulated), you may choose Stream 3 or, depending on the FEER "
+            "category, Stream 1 or Stream 2.\n"
+            "    - If regulation applies only to the professional title (and not the "
+            "practice itself), the occupation is NOT considered regulated for Stream 3.\n"
+            "    - If regulation applies only in the construction industry, it is "
+            "considered regulated ONLY when the job is carried out in that industry.\n"
+            "  • You hold at least ONE of the following documents issued by the Québec "
+            "regulatory authority governing your profession:\n"
+            "    - An authorization (licence) to practise your occupation in Québec "
+            "(regular, restrictive, temporary or probationary); OR\n"
+            "    - Proof of PARTIAL recognition of equivalence of training or diploma, "
+            "dated no more than 5 years before application; OR\n"
+            "    - Proof of FULL recognition of equivalence of training or diploma, "
+            "dated no more than 5 years before application.\n"
+            "    - An acknowledgement of receipt is NOT sufficient.\n"
+            "  • You have NOT been refused recognition by the regulatory authority on "
+            "the grounds that your qualifications are not recognized for practising "
+            "in Québec.\n"
+            "  • You meet the French language requirement BASED ON THE FEER CATEGORY "
+            "of your occupation:\n"
+            "    - If FEER 0, 1 or 2: French oral level 7 or higher (L7/S7+) AND written "
+            "level 5 or higher (W5+) according to the Québec scale.\n"
+            "    - If FEER 3, 4 or 5: spoken French (Speaking and Listening) level 5 or higher (L5/S5+).\n"
+            "  • If you have an accompanying spouse, they have spoken French (Speaking and Listening) at level 4 "
+            "or higher on the Québec scale.\n"
+            "If ANY of these conditions are not met, you MUST say I am not eligible for "
+            "Stream 3 yet and focus on regulatory and/or French-language actions "
+            "(e.g. obtaining recognition, increasing French levels according to FEER, "
+            "or resolving refusal issues)."
+        )
+
+    # Fallback / Manual / Unknown target – summarize all streams
+    else:
+        # Stream 1 summary
+        hard_rules.append(
+            "- STREAM 1 (if targeted): Need ALL of the following:\n"
+            "  • Main occupation classified FEER 0, 1 or 2.\n"
+            "  • ≥12 months of full-time or equivalent PAID work experience in the main "
+            "occupation (Québec or outside Québec) within the last 5 years, internships "
+            "counting for at most 3 months.\n"
+            "  • Diploma leading directly to a profession from a program of ≥1 year full-"
+            "time study (DEP/ASP, AEC/DEC technical, university cert/minor/major/"
+            "bachelor/DESS/master/PhD), obtained before application.\n"
+            "  • French oral L7/S7+ and written W5+; spouse (if any) with spoken "
+            "French ≥4.\n"
+            "  • Licence conditions satisfied if the occupation is regulated (otherwise "
+            "see Stream 3)."
+        )
+
+        # Stream 2 summary
+        hard_rules.append(
+            "- STREAM 2 (if targeted): Need ALL of the following:\n"
+            "  • Main occupation classified FEER 3, 4 or 5.\n"
+            "  • ≥24 months PAID full-time or equivalent work experience in the last "
+            "5 years, with ≥12 months in Québec in the main occupation. Up to 12 months "
+            "outside Québec may be in the main occupation or in the same broad NOC "
+            "category; internships can count up to 3 months.\n"
+            "  • At least a high school diploma OR a ≥1-year full-time program leading "
+            "to DEP/ASP/AEC (with Québec programs being ≥600 hours at secondary or "
+            "≥900 hours at college level), obtained before application.\n"
+            "  • spoken French (Speaking and Listening) L5/S5+; spouse (if any) with spoken French (Speaking and Listening) ≥4.\n"
+            "  • Licence conditions satisfied if the occupation is regulated (otherwise "
+            "see Stream 3)."
+        )
+
+        # Stream 3 summary
+        hard_rules.append(
+            "- STREAM 3 (if targeted – regulated professions):\n"
+            "  • Main occupation appears in the official List of Regulated Professions "
+            "of the Ministère (fully or non-fully regulated, with nuances on title-only "
+            "or construction-only regulation).\n"
+            "  • You hold an authorization to practise OR acceptable partial/full "
+            "recognition from the regulatory authority (dated ≤5 years), and you have "
+            "not been refused recognition.\n"
+            "  • French requirements depend on FEER category: FEER 0–2 → oral 7+, "
+            "written 5+; FEER 3–5 → spoken 5+; spouse (if any) spoken 4+."
+        )
+
+    hard_rules_text = "\n\n".join(hard_rules)
+    return hard_rules_text
+
+
 def _peq_threshold_met(sim: dict) -> bool:
     """
     Very simplified PEQ-style check (historical, for comparison only):
@@ -96,7 +261,7 @@ def render(p, t, scoring):
     st.header(t("sim_title"))
     st.markdown("""
     This tool simulates how your score changes over time.
-    **Crucial:** It accounts for **Age Decay**. As you gain experience (points up), you also get older (points down).
+    Crucial: It accounts for Age Decay. As you gain experience (points up), you also get older (points down).
     """)
 
     # --- 0. ROBUST INPUT SANITIZATION ---
@@ -358,7 +523,7 @@ def render(p, t, scoring):
         coloraxis_showscale=False,
         margin=dict(l=0, r=0, t=40, b=0)
     )
-
+    st.caption(t("legend"))
     st.plotly_chart(fig, width='stretch')
     st.caption(
     "A cell marked with ★ is a point where a simplified PEQ-style threshold "
@@ -366,32 +531,7 @@ def render(p, t, scoring):
     "PEQ is currently closed; this marker is for historical comparison only."
     )
 
-
-    # --- 5. EXPLANATION FORMULA ---
-    st.markdown("### 📐 How is this calculated?")
-
-    st.markdown(r"""
-    The simulation recalculates your official score for **every single square** in the grid.
-    It assumes you continue working in your current role:
-
-    $$
-    \text{Future Score} = \text{Current Profile} + \underbrace{\text{Tenure Gain}}_{\color{green}{\text{Points } \uparrow}} - \underbrace{\text{Age Decay}}_{\color{red}{\text{Points } \downarrow}} + \underbrace{\text{Target French}}_{\color{blue}{\text{New Skill Level}}}
-    $$
-    """)
-
-    with st.expander("ℹ️ Click to see exactly what changes"):
-        st.markdown(f"""
-        1.  **Start:** We take your current profile (Age: **{age_val}**, Experience: **{exp_val}** months).
-        2.  **Apply Time Travel:** For every month passed on the axis, we update:
-            * ✅ **General & Quebec Experience:** You gain 1 month of experience.
-            * ✅ **Shortage Job Tenure:** Your primary occupation tenure increases (re-calculating shortage points).
-            * ✅ **Spouse Experience:** Your spouse gains 1 month of Quebec experience (if applicable).
-            * ⚠️ **Age Decay (You & Spouse):** We calculate if you (or your spouse) cross a birthday threshold and deduct points accordingly.
-        3.  **Apply Language Target:** We **replace** your current French test results with the level selected on the axis.
-        """)
-
-
-# --- 5. STRATEGY & TIMING ANALYSIS ---
+        # --- 5. STRATEGY & TIMING ANALYSIS ---
     st.markdown("### ⏳ Strategic Timing & Analysis")
 
     # ---------------------------------------------------------
@@ -457,111 +597,279 @@ def render(p, t, scoring):
 
     st.divider()
 
-    # ---------------------------------------------------------
-    # C. PREPARE AI PROMPT
-    # ---------------------------------------------------------
 
-    # 1. Define Maximums
-    m_age = 100 if has_spouse else 120
-    m_edu = 110 if has_spouse else 130
-    m_exp = 50  if has_spouse else 70
-    m_fr  = 160 if has_spouse else 200
-    m_diag = 120; m_qc = 160; m_vjo = 50; m_reg = 120
-    m_auth = 50
-    m_sp_fr = 40; m_sp_age = 20; m_sp_edu = 20
+    # --- 5. EXPLANATION FORMULA ---
+    st.markdown("### 📐 How is this calculated?")
 
-    # 2. Glassbox Rules
-    scoring_rules_text = generate_scoring_cheat_sheet(scoring, has_spouse)
+    st.markdown(r"""
+    The simulation recalculates your official score for **every single square** in the grid.
+    It assumes you continue working in your current role:
 
-    # 3. Detailed Scorecard
-    detailed_breakdown = f"""
-    [A] HUMAN CAPITAL ({audit.get('total_hc', 0)} / 520)
-    - Age: {audit.get('hc_age', 0)} / {m_age} pts
-    - Education: {audit.get('hc_edu', 0)} / {m_edu} pts
-    - Experience: {audit.get('hc_exp', 0)} / {m_exp} pts ({p.get('gen_exp')} months)
-    - French (Main): {audit.get('hc_french', 0)} / {m_fr} pts
-      (Levels: L{p.get('fr_l')}/S{p.get('fr_s')}/R{p.get('fr_r')}/W{p.get('fr_w')})
+    $$
+    \text{Future Score} = \text{Current Profile} + \underbrace{\text{Tenure Gain}}_{\color{green}{\text{Points } \uparrow}} - \underbrace{\text{Age Decay}}_{\color{red}{\text{Points } \downarrow}} + \underbrace{\text{Target French}}_{\color{blue}{\text{New Skill Level}}}
+    $$
+    """)
 
-    [B] QUEBEC NEEDS ({audit.get('total_qn', 0)} / 700)
-    - Shortage Job: {audit.get('qn_diag', 0)} / {m_diag} pts
-    - QC Work History: {audit.get('qn_qc_exp', 0)} / {m_qc} pts ({p.get('qc_exp')} months)
-    - VJO (Offer): {audit.get('qn_vjo', 0)} / {m_vjo} pts
-    - Regulated License (Auth): {audit.get('qn_auth', 0)} / {m_auth} pts
-    - Regional Ties: {audit.get('qn_out', 0)} / {m_reg} pts
+    with st.expander("ℹ️ Click to see exactly what changes"):
+        st.markdown(f"""
+        1.  **Start:** We take your current profile (Age: **{age_val}**, Experience: **{exp_val}** months).
+        2.  **Apply Time Travel:** For every month passed on the axis, we update:
+            * ✅ **General & Quebec Experience:** You gain 1 month of experience.
+            * ✅ **Shortage Job Tenure:** Your primary occupation tenure increases (re-calculating shortage points).
+            * ✅ **Spouse Experience:** Your spouse gains 1 month of Quebec experience (if applicable).
+            * ⚠️ **Age Decay (You & Spouse):** We calculate if you (or your spouse) cross a birthday threshold and deduct points accordingly.
+        3.  **Apply Language Target:** We **replace** your current French test results with the level selected on the axis.
+        """)
 
-    [C] SPOUSE / ADAPTATION ({audit.get('total_ad', 0)} / 180)
-    - Spouse French: {audit.get('ad_fr', 0)} / {m_sp_fr} pts (Levels: L{p.get('sp_fr_l')}/S{p.get('sp_fr_s')})
-    """
 
-    # 4. Dynamic Instructions (Logic Branching)
-    strategy_instructions = []
 
-    # [JOB & VJO LOGIC - THE CRITICAL FIX]
-    # We compare the Global Max Projected Score against the Target.
-    # If Max < Target, we stop being conservative and start being aggressive.
+#     st.divider()
+#     st.markdown("### 💥 Analysis with AI")
+#     # ---------------------------------------------------------
+#     # C. PREPARE AI PROMPT
+#     # ---------------------------------------------------------
 
-    if audit.get('qn_vjo', 0) == 50:
-        if global_max_projected >= target_score:
-            # SCENARIO A: Safe. The VJO is helping us win. Keep it.
-            strategy_instructions.append("- VJO STATUS: I have a VJO and my projected score meets the target. Emphasize protecting this VJO (do not switch jobs risking it).")
-        else:
-            # SCENARIO B: Stuck. The VJO is not enough. We must switch.
-            strategy_instructions.append("- VJO STATUS: I have a VJO, but my path FAILS even with it (Max Score < Target). Do NOT blindly protect it. I MUST switch to a Shortage Job to bridge the gap. Assume I will secure a new VJO in the new role.")
-            strategy_instructions.append("- STRATEGY CHANGE: Prioritize 'Switching to Shortage NOC' as the #1 Move.")
-    else:
-        # User has no VJO
-        if audit.get('qn_diag', 0) >= 90:
-             strategy_instructions.append("- JOB STATUS: I already have a Deficit Job. Focus on 'Time in Job' and getting a VJO for this job.")
-        else:
-             strategy_instructions.append("- JOB STATUS: My job is not scoring high. Is switching NOCs worth the risk?")
-             strategy_instructions.append("- VJO: I have 0/50. Is getting a VJO the fastest way to get 50 pts?")
+#     # 1. Define Maximums
+#     m_age = 100 if has_spouse else 120
+#     m_edu = 110 if has_spouse else 130
+#     m_exp = 50  if has_spouse else 70
+#     m_fr  = 160 if has_spouse else 200
+#     m_diag = 120; m_qc = 160; m_vjo = 50; m_reg = 120
+#     m_auth = 50
+#     m_sp_fr = 40; m_sp_age = 20; m_sp_edu = 20
 
-    # [French Logic]
-    strategy_instructions.append("- FRENCH ADVICE: Focus ONLY on big jumps (0 to 5) for me. Do NOT suggest going from 7 to 8 (too much effort, low ROI).")
+#     # 2. Glassbox Rules
+#     scoring_rules_text = generate_scoring_cheat_sheet(scoring, has_spouse)
 
-    # [License Logic]
-    strategy_instructions.append("- LICENSE CHECK: Only suggest getting a License/Auth if the job is traditionally regulated (Health, Teaching, Engineering). If the job is IT, Tech, or Business, IGNORE this category (assume N/A).")
+#     # 3. Detailed Scorecard
+#     detailed_breakdown = f"""
+#     [A] HUMAN CAPITAL ({audit.get('total_hc', 0)} / 520)
+#     - Age: {audit.get('hc_age', 0)} / {m_age} pts
+#     - Education: {audit.get('hc_edu', 0)} / {m_edu} pts
+#     - Experience: {audit.get('hc_exp', 0)} / {m_exp} pts ({p.get('gen_exp')} months)
+#     - French (Main): {audit.get('hc_french', 0)} / {m_fr} pts
+#       (Levels: L{p.get('fr_l')}/S{p.get('fr_s')}/R{p.get('fr_r')}/W{p.get('fr_w')})
 
-    # [Diploma Logic]
-    strategy_instructions.append("- DIPLOMA LOGIC: If you suggest a Diploma, you MUST calculate the Opportunity Cost (Lost Work History points vs Diploma points).")
+#     [B] QUEBEC NEEDS ({audit.get('total_qn', 0)} / 700)
+#     - Shortage Job: {audit.get('qn_diag', 0)} / {m_diag} pts
+#     - QC Work History: {audit.get('qn_qc_exp', 0)} / {m_qc} pts ({p.get('qc_exp')} months)
+#     - VJO (Offer): {audit.get('qn_vjo', 0)} / {m_vjo} pts
+#     - Regulated License (Auth): {audit.get('qn_auth', 0)} / {m_auth} pts
+#     - Regional Ties: {audit.get('qn_out', 0)} / {m_reg} pts
 
-    formatted_instructions = "\n".join(strategy_instructions)
+#     [C] SPOUSE / ADAPTATION ({audit.get('total_ad', 0)} / 180)
+#     - Spouse French: {audit.get('ad_fr', 0)} / {m_sp_fr} pts (Levels: L{p.get('sp_fr_l')}/S{p.get('sp_fr_s')})
+#     """
 
-    # 5. Final Prompt
-    ai_prompt_text = f"""
-Act as a Ruthless Quebec Immigration Strategist.
-I am running a simulation to reach a Target Score of {target_score}.
 
-Below is my DETAILED SCORECARD.
+#     # 4. Hard eligibility rules by stream (MUST be respected)
+#     hard_rules = []
+#     hard_rules_text = build_hard_rules(target_stream_name)
 
-{detailed_breakdown}
+#     # 4. Dynamic Instructions (Logic Branching)
+#     strategy_instructions = []
 
-FUTURE SCENARIO MATRIX (Rows = French Level, Cols = Months Passed):
-{projection_text}
 
-OFFICIAL SCORING REFERENCE (Use this for math):
-{scoring_rules_text}
+#     # [JOB & VJO LOGIC - THE CRITICAL FIX]
+#     # We compare the Global Max Projected Score against the Target.
+#     # If Max < Target, we stop being conservative and start being aggressive.
 
-YOUR INSTRUCTIONS (Follow Strictly):
-{formatted_instructions}
+#     if audit.get('qn_vjo', 0) == 50:
+#         if global_max_projected >= target_score:
+#             # SCENARIO A: Safe. The VJO is helping us win. Keep it.
+#             strategy_instructions.append("- VJO STATUS: I have a VJO and my projected score meets the target. Emphasize protecting this VJO (do not switch jobs risking it).")
+#         else:
+#             # SCENARIO B: Stuck. The VJO is not enough. We must switch.
+#             strategy_instructions.append("- VJO STATUS: I have a VJO, but my path FAILS even with it (Max Score < Target). Do NOT blindly protect it. I MUST switch to a Shortage Job to bridge the gap. Assume I will secure a new VJO in the new role.")
+#             strategy_instructions.append("- STRATEGY CHANGE: Prioritize 'Switching to Shortage NOC' as the #1 Move.")
+#     else:
+#         # User has no VJO
+#         if audit.get('qn_diag', 0) >= 90:
+#              strategy_instructions.append("- JOB STATUS: I already have a Deficit Job. Focus on 'Time in Job' and getting a VJO for this job.")
+#         else:
+#              strategy_instructions.append("- JOB STATUS: My job is not scoring high. Is switching NOCs worth the risk?")
+#              strategy_instructions.append("- VJO: I have 0/50. Is getting a VJO the fastest way to get 50 pts?")
 
-OUTPUT FORMAT (No intro, no fluff):
-1. THE DIAGNOSIS: Why am I stuck? (1 sentence)
-2. THE HIGH-ROI MOVES: List specific actions. Use the FUTURE SCENARIO MATRIX to check if "Time Only" is enough to reach the target.
-3. THE VERDICT: Start with "YES" or "NO". Then, summarize the *exact combination* required.
-   (Example: "YES: The Matrix shows that Month 24 (Time Only) reaches 780 pts, which exceeds your target. No study needed.")
-"""
+#     # [French Logic]
+#     strategy_instructions.append("- FRENCH ADVICE: Focus ONLY on big jumps (0 to 5) for me. Do NOT suggest going from 7 to 8 (too much effort, low ROI).")
 
-    encoded_prompt = urllib.parse.quote(ai_prompt_text)
-    chatgpt_url = f"https://chatgpt.com/?q={encoded_prompt}"
+#     # [License Logic]
+#     strategy_instructions.append("- LICENSE CHECK: Only suggest getting a License/Auth if the job is traditionally regulated (Health, Teaching, Engineering). If the job is IT, Tech, or Business, IGNORE this category (assume N/A).")
 
-    col_btn, col_info = st.columns([1, 2])
-    with col_btn:
-        st.link_button("🚀 Analyze with ChatGPT", chatgpt_url, type="primary")
-    with col_info:
-        st.caption("Click to open ChatGPT with the **Strict ROI Analysis**.")
+#     # [Diploma Logic]
+#     strategy_instructions.append("- DIPLOMA LOGIC: If you suggest a Diploma, you MUST calculate the Opportunity Cost (Lost Work History points vs Diploma points).")
 
-    with st.expander("Show Raw Prompt (Debug)", expanded=False):
-        st.code(ai_prompt_text, language="text")
+#     formatted_instructions = "\n".join(strategy_instructions)
 
-    st.caption(t("legend"))
+#     # 5. Final Prompt
+#     ai_prompt_text = f"""
+# You are a Senior Quebec immigration lawyer.
+# You are NOT my representative; you are giving educational strategy only,
+# not legal advice.
+
+# My goal is to reach a Target Score of {target_score} in the PSTQ.
+# My current score (today) is {curr_score}.
+
+# The scenario matrix below already encodes all realistic future outcomes
+# based on my current profile and the levers we allow (time, French, job, etc.).
+# You MUST treat this matrix as the ceiling of what is possible.
+
+# - Current max in the matrix (best case): {max_score_val} pts
+# - Global projected maximum across all milestones: {global_max_projected} pts
+# - Target stream: {target_stream_name}
+
+# If the global maximum is below the target, you MUST clearly say that I cannot
+# reach the target with the allowed levers, and explain which constraint blocks me.
+
+# ------------------------------------------------
+# MY DETAILED SCORECARD (Today)
+# ------------------------------------------------
+
+# {detailed_breakdown}
+
+# ------------------------------------------------
+# FUTURE SCENARIO MATRIX
+# (Rows = French level, Cols = Months passed)
+# ------------------------------------------------
+
+# Use this text as your only source of future scores:
+
+# {projection_text}
+
+# Do NOT invent new future scores beyond what this matrix implies.
+
+# ------------------------------------------------
+# OFFICIAL SCORING REFERENCE (For calculations)
+# ------------------------------------------------
+
+# {scoring_rules_text}
+
+# ------------------------------------------------
+# HARD ELIGIBILITY RULES BY STREAM (MUST OBEY)
+# ------------------------------------------------
+
+# {hard_rules_text}
+
+# Additional hard rules:
+
+# - Never propose a strategy that violates any eligibility rule above.
+# - If I do NOT meet the hard rules for the targeted stream, you MUST say
+#   that I am not eligible yet, and focus on how to reach eligibility
+#   (minimum work months and French).
+
+# ------------------------------------------------
+# STRATEGY HEURISTICS (Ruthless ROI)
+# ------------------------------------------------
+
+# Use these principles, which come from my own analysis:
+
+# - First, check the Time Only path on my CURRENT job:
+#   - State clearly the highest Time-Only score and the month it occurs.
+#   - If Time Only never comes close to the target, say that path is dead.
+
+# - High-ROI levers you are allowed to use:
+#   - Switching to a Shortage NOC (especially outside Montréal).
+#   - Maximizing Shortage NOC points over time (12 / 24 / 36 / 48+ months).
+#   - Maximizing Regional ties up to 120/120, especially living/working outside Montréal.
+#   - Obtaining a regulated license ONLY if the job is in a traditionally regulated field
+#     (health, teaching, engineering, etc.).
+#   - Big French jumps only:
+#     - Principal: focus on 0 → 5 in Reading/Writing before any micro-upgrades.
+#     - Do NOT suggest tiny upgrades like 7 → 8 unless they are numerically decisive.
+#     - Spouse: upgrading oral French may add a few points but is secondary.
+
+# - Low or negative ROI levers:
+#   - A >900h Quebec diploma often has a high opportunity cost:
+#     if it requires stopping work for 12 months, compare the lost work/QC/shortage points
+#     to the diploma points. If the net is negative or marginal, say so clearly and
+#     do NOT recommend the diploma as a primary strategy.
+
+# - VJO logic:
+#   - If I already have a VJO and my projected maximum meets the target, prioritize
+#     protecting the current VJO (do not casually suggest risky job changes).
+#   - If even with optimal moves my global maximum < target, then acknowledge that
+#     protecting the current VJO is not enough, and it may be rational to switch to
+#     a Shortage NOC to rebuild a stronger case.
+
+# ------------------------------------------------
+# IMPORTANT LIMITATIONS & ASSUMPTIONS (MUST OBEY)
+# ------------------------------------------------
+
+# This analysis is a NUMERICAL SIMULATION under a FIXED PROFILE.
+
+# You MUST assume that:
+# - The occupation used in this simulation is FIXED and CANNOT be changed.
+# - The simulator has ALREADY decided whether the occupation is:
+#   - a shortage / deficit occupation or not,
+#   - regulated or not,
+#   - eligible for license points or not.
+# - You are NOT allowed to reclassify the occupation, infer a different NOC,
+#   or suggest switching to another profession to increase shortage points.
+
+# Even if I mention a different job title or NOC elsewhere, you MUST treat
+# the SCENARIO MATRIX as authoritative and final.
+
+# You do NOT know:
+# - My real-life profession or job history;
+# - Whether I can realistically switch occupations;
+# - Whether another NOC is feasible for me.
+
+# Therefore:
+# - Do NOT question, reinterpret, or override the matrix.
+# - Do NOT suggest career changes outside what the matrix already encodes.
+# - Your task is ONLY to determine whether, by continuing in THIS simulated
+#   profile and improving allowed levers (time, French, regional ties,
+#   licenses already modeled), the target score is achievable.
+
+
+# ------------------------------------------------
+# YOUR TASK
+# ------------------------------------------------
+
+# 1. Use the SCORECARD + MATRIX to decide if the target score {target_score} is
+#    realistically reachable under these rules.
+# 2. If the global maximum < target, your VERDICT must be NO, and you must explain
+#    which bottlenecks cannot be solved (e.g., age, maximum points in Shortage + French).
+# 3. If the target IS reachable, identify the simplest high-ROI combo of:
+#    - Shortage job tenure,
+#    - French jumps,
+#    - Regional ties,
+#    - License (only if appropriate),
+#    that gets me above the target with some buffer, and specify the month.
+
+# ------------------------------------------------
+# OUTPUT FORMAT (No intro, no fluff)
+# ------------------------------------------------
+
+# 1. THE DIAGNOSIS:
+#    - 1–2 sentences. Say whether my current path (without major changes) is dead
+#      or still viable, using matrix numbers (e.g. "Time-only peaks at 566 pts in Month 24").
+
+# 2. HIGH-ROI STRATEGY TIMELINE:
+#    - Do not just list bullet points. Create a chronological list:
+#    - NOW: [Immediate Action] (e.g. Switch to Shortage NOC)
+#    - MONTH 12: [Milestone/Status] (e.g. Reach 12m Shortage experience -> +90 pts)
+#    - MONTH 18: [Action] (e.g. Take French test, aiming for R5/W5)
+#    - MONTH 24: [Result] (Score hits {target_score} -> Target Met)
+
+# 3. VERDICT (YES / NO):
+#    - Start the paragraph with YES: or NO:.
+#    - If YES: specify the earliest month and score where I exceed {target_score}, and which
+#      combo achieves it.
+#    - If NO: explain in 2–3 sentences why even the best combo from the matrix fails
+#      (e.g. "Even at Month 36 with Shortage + max French + license, the matrix caps at 740 pts.").
+
+# 4. LEGAL DISCLAIMER:
+#    - End with one short sentence reminding that this is a numerical simulation only
+#      and not legal advice or an official eligibility decision.
+# """
+
+
+#     st.markdown("### Generate AI Strategy")
+
+#     col_copy = st.container()
+
+#     with col_copy:
+#         st.info("👇 Recommended: Copy this text and paste it into ChatGPT/Claude.")
+#         # st.code automatically provides a copy button on hover
+#         st.code(ai_prompt_text, language="markdown")
