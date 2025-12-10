@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 
+# --- Plan d’immigration 2026: Travailleurs qualifiés ---
+PLAN_2026_TQ_MIN = 27050
+PLAN_2026_TQ_MAX = 29500
+
 
 def compute_avg_score(draws_data):
     """Average cutoff score across all rows that have a numeric score."""
@@ -40,10 +44,11 @@ def _prepare_draws_for_display(draws_data):
     for _, row in df.iterrows():
         key = (row["Date"], row["Stream"])
         if key in seen:
-            invited_display.append("")  # visually empty, underlying numeric stays in Invited
+            invited_display.append("")  # visually empty
         else:
-            # you can format with thousands separator if you want
-            invited_display.append(str(int(row["Invited"])) if pd.notna(row["Invited"]) else "")
+            invited_display.append(
+                str(int(row["Invited"])) if pd.notna(row["Invited"]) else ""
+            )
             seen.add(key)
 
     df["Invited_display"] = invited_display
@@ -53,16 +58,16 @@ def _prepare_draws_for_display(draws_data):
         columns={"Invited_display": "Invited"}
     )
 
-    return df, df_display  # df = raw (with numeric Invited), df_display = for UI
+    return df, df_display  # df = raw, df_display = for UI
 
 
 def _compute_summary(draws_data):
-    """Compute total invited and average score (only where a score exists)."""
+    """Compute total invited, average score, and number of draws (date+stream)."""
     df_raw = pd.DataFrame(draws_data)
     if df_raw.empty:
         return 0, 0.0, 0
 
-    # Total invited: sum unique (Date, Stream) so 605/604/649 are not double-counted
+    # Total invited: sum unique (Date, Stream) so 605/604/649 etc. are not double-counted
     total_invited = (
         df_raw.drop_duplicates(subset=["Date", "Stream"])["Invited"].sum()
     )
@@ -80,11 +85,35 @@ def render(draws_data, t):
     # ---- Summary metrics (top) ----
     total_invited, avg_score, num_draws = _compute_summary(draws_data)
 
-    c1, c2 = st.columns(2)
+    # Compare to Plan d’immigration 2026 – Travailleurs qualifiés (27 050 – 29 500)
+    used = total_invited
+    remaining_min = max(PLAN_2026_TQ_MIN - used, 0)
+    remaining_max = max(PLAN_2026_TQ_MAX - used, 0)
+
+    # Share of the 2026 plan already "used" by current PSTQ selections
+    used_pct_min = used / PLAN_2026_TQ_MAX * 100  # vs max
+    used_pct_max = used / PLAN_2026_TQ_MIN * 100  # vs min
+
+    c1, c2, c3 = st.columns(3)
     with c1:
-        st.metric("Total invited (all draws)", f"{total_invited:,}")
+        st.metric("Total invited (PSTQ Streams 1–4)", f"{total_invited:,}")
     with c2:
         st.metric("Average cutoff score (Streams 1–3)", f"{avg_score:.1f}")
+    with c3:
+        st.metric(
+            "Estimated places remaining (Plan 2026 – Travailleurs qualifiés)",
+            f"{remaining_min:,} – {remaining_max:,}",
+            help=(
+                "Based on Québec’s Plan d’immigration 2026 for Travailleurs qualifiés "
+                f"({PLAN_2026_TQ_MIN:,}–{PLAN_2026_TQ_MAX:,}). "
+                "PSTQ selections made in 2025 are assumed to contribute primarily "
+                "to 2026 admissions. This comparison is indicative."
+            ),
+        )
+        st.caption(
+            f"Current selections ≈ {used_pct_min:.1f}–{used_pct_max:.1f}% of the 2026 "
+            "Travailleurs qualifiés plan."
+        )
 
     # ---- Single main table, no manual pagination ----
     _, df_display = _prepare_draws_for_display(draws_data)
@@ -97,9 +126,21 @@ def render(draws_data, t):
 
     st.caption(
         "Each row is a published score cutoff within a draw. For Stream 4 "
-        "(Exceptional talent), no score cutoff is published, so the score cell is empty. "
-        "“Invited” is the total invitations for that date and stream, shown only on the "
-        "first line for each draw."
+        "(Exceptional talent), no score cutoff is published. "
+        "“Invited” is the total invitations for that date and stream. "
+        "The quota comparison is a forward-looking estimate against the "
+        "2026 Travailleurs qualifiés admission plan."
     )
 
+    # --- References ---
+    with st.expander("References and sources"):
+        st.markdown(
+            "- [Plan d’immigration 2026 – MIFI (official PDF)]"
+            "(https://cdn-contenu.quebec.ca/cdn-contenu/adm/min/immigration/publications-adm/plan-immigration/PL_immigration_2026_MIFI.pdf"
+            ")\n"
+            "- [PSTQ Invitations dans Arrima du Programme de sélection des travailleurs qualifiés (2025)]"
+            "(https://www.quebec.ca/immigration/permanente/travailleurs-qualifies/programme-selection-travailleurs-qualifies/invitation/2025)"
+        )
+
     st.info(t('tip'))
+

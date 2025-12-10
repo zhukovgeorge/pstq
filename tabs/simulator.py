@@ -126,6 +126,7 @@ def render(p, t, scoring):
 
     if target_selection == t("manual"):
         target_score = c_score.number_input("Target Score", 500, 900, AVG_SCORE)
+        c_score.caption(f"Average cutoff is ~{AVG_SCORE}")
     else:
         # find the selected draw among score_draws only
         for d in score_draws:

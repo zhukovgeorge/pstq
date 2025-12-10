@@ -162,3 +162,10 @@ def render(t, scoring, tr):
             if band[1] > 1000: label = "48+ months"
             sp_qc_data.append({"Duration": label, "Points": band[2]})
         st.dataframe(pd.DataFrame(sp_qc_data), hide_index=True, width='stretch')
+
+    # --- References ---
+    st.divider()
+    st.subheader("References and Sources")
+    st.markdown("""
+    - [Official PSTQ Scoring Grid (MIFI)](https://cdn-contenu.quebec.ca/cdn-contenu/immigration/publications/fr/Pointage_criteres.pdf)
+    """)

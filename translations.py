@@ -183,6 +183,8 @@ TEXTS = {
         "job_col_cat": "Category",
         "job_stats_deficit": "Total Deficit Professions",
         "job_stats_deficit_delta": "High Priority Targets",
+        "job_stats_slight_deficit" : "Total Slight Deficit Professions",
+        "job_stats_slight_deficit_delta": "Moderate Priority Targets",
         "job_matches": "Showing **{n}** matches:",
         "job_cat_chart_title": "Distribution of Jobs by Category (Filtered)",
 
@@ -319,6 +321,8 @@ TEXTS = {
         "job_col_cat": "Catégorie",
         "job_stats_deficit": "Total des professions en déficit",
         "job_stats_deficit_delta": "Professions hautement prioritaires",
+        "job_stats_slight_deficit" : "Total des professions en léger déficit",
+        "job_stats_slight_deficit_delta": "Professions modérément prioritaires",
         "job_matches": "Affichage de **{n}** résultats :",
         "job_cat_chart_title": "Répartition des emplois par catégorie (filtre appliqué)",
 

@@ -44,11 +44,27 @@ def render(t):
 
     # --- 2. DASHBOARD STATS (raw diagnosis) ---
     deficit_count = len(df_jobs[df_jobs["Diagnosis"].str.contains("Déficit", na=False)])
-    st.metric(
-        t("job_stats_deficit"),
-        deficit_count,
-        delta=t("job_stats_deficit_delta"),
+    slight_deficit_count = len(
+        df_jobs[df_jobs["Diagnosis"].str.contains("Léger déficit", na=False)]
     )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.metric(
+            t("job_stats_deficit"),
+            deficit_count,
+            delta=t("job_stats_deficit_delta"),
+        )
+
+    with c2:
+        st.metric(
+            t("job_stats_slight_deficit"),
+            slight_deficit_count,
+            delta=t("job_stats_slight_deficit_delta"),
+        )
+
+
 
     st.divider()
 
@@ -134,3 +150,9 @@ def render(t):
                 color_continuous_scale="viridis",
             )
             st.plotly_chart(fig, width='stretch')
+
+    # --- 6. REFERENCES ---
+    with st.expander("References and sources"):
+        st.markdown(
+            "- [DIAGNOSTICS DE MOYEN TERME 2024-2028 POUR LES 516 PROFESSIONS DE LA CLASSIFICATION NATIONALE DES PROFESSIONS CNP 2021](https://cdn-contenu.quebec.ca/cdn-contenu/immigration/formulaires/fr/PSTQ/LIS_Diagnostics_moyen_terme_2024-2028_516_professions.pdf)"
+        )
