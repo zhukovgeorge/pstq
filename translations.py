@@ -124,7 +124,7 @@ TEXTS = {
     "en": {
         "app_title": "🍁 Quebec PSTQ Simulator",
         "app_subtitle": "Interactive score calculator for the *Regular Skilled Worker Program*.",
-        "lang_select": "Langue / ",
+        "lang_select": "Langue / Language",
 
         # Sidebar
         "sb_title": "1. Profile Setup",
@@ -198,6 +198,7 @@ TEXTS = {
 
         # Simulator
         "sim_title": "🎯 Target Strategy Map",
+        "sim_title_description": "This tool simulates how your score changes over time. Crucial: It accounts for Age Decay. As you gain experience (points up), you also get older (points down).",
         "step1": "Step 1: Set your Target",
         "select_draw": "Select a Draw Round to Beat:",
         "manual": "Manual Entry",
@@ -205,7 +206,43 @@ TEXTS = {
         "x_axis": "X-Axis (Bottom)",
         "y_axis": "Y-Axis (Left)",
         "green_zone": "Green Zone Analysis (Cutoff: {score})",
-        "legend": "🟥 Red = Below Target | 🟩 Green = Qualified for Invitation",
+        "legend": "🟥 Red = Score below threshold | 🟩 Green = Score ≥ threshold",
+        "avg_cutoff": "Average Cutoff is",
+        "peq_tip": "💡 **Tip:** A cell marked with a star ★ indicates a point where a simplified PEQ-style threshold (≥24 months of Quebec work + French oral ≥7) would be met.",
+        "strategy_timing": "### ⏳ Strategic Timing & Analysis",
+        "peq_met": "✅ PEQ threshold met (historical program)",
+        "peq_not_met": "❌ PEQ threshold not met",
+        "peak_score": "📈 Your Peak Score: {score}",
+        "peak_score_occurs" : "This occurs in **{months} months** ({date}).",
+        "lang_test_deadline_label" : "📝 Language Test Deadline: {month_year}",
+        "lang_test_deadline_asap" : "📝 Language Test Deadline: ASAP",
+        "vjo_renewal_warning": "⚠️ **Warning:** Your peak score is in >18 months. You will need to renew your VJO.",
+        "calc_section_title": "### 📐 How is this calculated?",
+        "calc_section_body": (
+            "The simulation recalculates your official score for **every single square** in the grid. "
+            "It assumes you continue working in your current role:\n\n"
+            "$$\n"
+            "\\text{Future Score} = \\text{Current Profile} + "
+            "\\underbrace{\\text{Tenure Gain}}_{\\color{green}{\\text{Points } \\uparrow}} - "
+            "\\underbrace{\\text{Age Decay}}_{\\color{red}{\\text{Points } \\downarrow}} + "
+            "\\underbrace{\\text{Target French}}_{\\color{blue}{\\text{New Skill Level}}}\n"
+            "$$"
+        ),
+        "calc_expander_title" : "ℹ️ See Calculation Details",
+        "calc_section_expander" : (
+            "1. **Starting Point:** We take your current profile (Age: **{age}**, Experience: **{exp}** months).\n"
+            "2.  **Apply Time Travel:** For every month passed on the axis, we update:\n"
+                "* ✅ **General & Quebec Experience:** You gain 1 month of experience.\n"
+                "* ✅ **Shortage Job Tenure:** Your primary occupation tenure increases (re-calculating shortage points).\n"
+                "* ✅ **Spouse Experience:** Your spouse gains 1 month of Quebec experience (if applicable).\n"
+                "* ⚠️ **Age Decay (You & Spouse):** We calculate if you (or your spouse) cross a birthday threshold and deduct points accordingly.\n"
+            "3.  **Apply Language Target:** We **replace** your current French test results with the level selected on the axis.\n"
+        ),
+        "target_score_label": "Target Score:",
+
+
+
+
 
         # Draws Tab
         "draws_title": "📢 Recent Invitation Rounds",
@@ -338,6 +375,7 @@ TEXTS = {
 
         # Simulator
         "sim_title": "🎯 Carte Stratégique",
+        "sim_title_description": "Cet outil simule comment votre score évolue dans le temps. Crucial : Il prend en compte la perte de points liée à l'âge. En gagnant de l'expérience (points en hausse), vous vieillissez aussi (points en baisse).",
         "step1": "Étape 1: Définir votre Cible",
         "select_draw": "Choisir un tirage à battre:",
         "manual": "Entrée Manuelle",
@@ -345,7 +383,41 @@ TEXTS = {
         "x_axis": "Axe X (Bas)",
         "y_axis": "Axe Y (Gauche)",
         "green_zone": "Analyse Zone Verte (Seuil: {score})",
-        "legend": "🟥 Rouge = Sous la cible | 🟩 Vert = Qualifié pour invitation",
+        "legend": "🟥 Rouge = Score sous le seuil | 🟩 Vert = Score ≥ seuil",
+        "avg_cutoff": "Le score moyen de coupure est",
+        "peq_tip": "💡 **Astuce :** Une cellule marquée d'une étoile ★ indique un point où le seuil simplifié de type PEQ (≥24 mois de travail au Québec + Français oral ≥7) serait atteint.",
+        "strategy_timing": "### ⏳ Analyse Stratégique du Timing",
+        "peq_met": "✅ Seuil PEQ atteint (programme historique)",
+        "peq_not_met": "❌ Seuil PEQ non atteint",
+        "peak_score": "📈 Votre score maximal : {score}",
+        "peak_score_occurs" : "Cela se produit dans **{months} mois** ({date}).",
+        "lang_test_deadline_label" : "📝 Date limite du test de langue : {month_year}",
+        "lang_test_deadline_asap" : "📝 Date limite du test de langue : Dès que possible",
+        "vjo_renewal_warning": "⚠️ **Attention :** Votre score maximal est dans plus de 18 mois. Vous devrez renouveler votre OEV.",
+        "calc_section_title": "### 📐 Comment est-ce calculé ?",
+        "calc_section_body": (
+            "La simulation recalcule votre score officiel pour **chaque case** de la grille. "
+            "Elle suppose que vous continuez à travailler dans votre poste actuel :\n\n"
+            "$$\n"
+            "\\text{Score futur} = \\text{Profil actuel} + "
+            "\\underbrace{\\text{Gain d'ancienneté}}_{\\color{green}{\\text{Points } \\uparrow}} - "
+            "\\underbrace{\\text{Perte liée à l'âge}}_{\\color{red}{\\text{Points } \\downarrow}} + "
+            "\\underbrace{\\text{Français cible}}_{\\color{blue}{\\text{Nouveau niveau}}}\n"
+            "$$"
+        ),
+        "calc_expander_title" : "ℹ️ Voir les détails du calcul",
+        "calc_section_expander" : (
+            "1. **Point de départ :** Nous utilisons votre profil actuel (Âge : **{age}**, Expérience : **{exp}** mois).\n"
+            "2. **Application du “Time Travel” :** Pour chaque mois ajouté sur l’axe, nous mettons à jour :\n"
+                "* ✅ **Expérience générale et au Québec :** vous gagnez 1 mois d’expérience.\n"
+                "* ✅ **Ancienneté en emploi en pénurie :** votre ancienneté dans l’occupation principale augmente (recalcul des points de pénurie).\n"
+                "* ✅ **Expérience du conjoint :** votre conjoint gagne 1 mois d’expérience au Québec (le cas échéant).\n"
+                "* ⚠️ **Impact de l’âge (vous & conjoint) :** nous vérifions si vous (ou votre conjoint) franchissez un seuil d’âge et ajustons les points.\n"
+            "3.  **Application du français cible :** nous **remplaçons** vos résultats actuels en français par le niveau sélectionné sur l’axe.\n"
+        ),
+        "target_score_label": "Score Cible :",
+
+
 
         # Draws Tab
         "draws_title": "📢 Rondes d'invitation récentes",

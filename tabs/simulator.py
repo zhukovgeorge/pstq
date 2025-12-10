@@ -259,10 +259,7 @@ def generate_scoring_cheat_sheet(scoring, has_spouse):
 
 def render(p, t, scoring):
     st.header(t("sim_title"))
-    st.markdown("""
-    This tool simulates how your score changes over time.
-    Crucial: It accounts for Age Decay. As you gain experience (points up), you also get older (points down).
-    """)
+    st.markdown(t("sim_title_description"))
 
     # --- 0. ROBUST INPUT SANITIZATION ---
     def safe_get(key):
@@ -310,8 +307,9 @@ def render(p, t, scoring):
     target_stream_name = "Manual Target"
 
     if target_selection == t("manual"):
-        target_score = c_score.number_input("Target Score", 500, 900, AVG_SCORE)
-        c_score.caption(f"Average cutoff is ~{AVG_SCORE}")
+        target_score = c_score.number_input(t("target_score_label"), 500, 900, AVG_SCORE)
+        c_score.caption(t("avg_cutoff") + f" ~{AVG_SCORE}")
+
     else:
         # find the selected draw among score_draws only
         for d in score_draws:
@@ -445,8 +443,8 @@ def render(p, t, scoring):
 
     # Tooltip text can still mention PEQ status (optional)
     df_sim["peq_text"] = df_sim["peq"].apply(
-        lambda v: "✅ PEQ-style threshold met (historical program)"
-                if v else "❌ PEQ-style threshold not met"
+        lambda v: t("peq_met")
+                if v else t("peq_not_met")
     )
 
     df_sim["tooltip"] = df_sim.apply(
@@ -476,25 +474,28 @@ def render(p, t, scoring):
     # Avoid divide-by-zero
     if max_val == min_val: max_val += 1
 
-    # Calculate the Cutoff Ratio
-    if target_score >= max_val:
-        mid_ratio = 1.0
-    elif target_score <= min_val:
-        mid_ratio = 0.0
-    else:
-        mid_ratio = (target_score - min_val) / (max_val - min_val)
+    # Case 1: Threshold is ABOVE all observed scores → nobody reaches it → all red
+    if target_score > max_val:
+        custom_colors = [
+            [0.0, "#7f1d1d"],  # Dark red
+            [1.0, "#fca5a5"],  # Light red
+        ]
 
-    # --- THE COLOR FIX ---
-    # 1. Start at Dark Red
-    # 2. Fade to Very Light Red right before the target
-    # 3. Switch to Solid Green AT the target
-    # 4. Stay Solid Green until the max score
-    custom_colors = [
-        [0.0, "#7f1d1d"],       # Darkest Red (Worst Score)
-        [mid_ratio, "#fca5a5"], # Lightest Red (Almost there)
-        [mid_ratio, "#16a34a"], # Solid Green (Target Reached)
-        [1.0, "#16a34a"]        # Solid Green (Max Score - SAME COLOR)
-    ]
+    else:
+        # Clamp threshold ratio into [0, 1]
+        if target_score <= min_val:
+            thr_ratio = 0.0
+        else:
+            thr_ratio = (target_score - min_val) / (max_val - min_val)
+
+        # Below threshold: shades of red
+        # At/above threshold: solid green
+        custom_colors = [
+            [0.0, "#7f1d1d"],                        # Dark red (worst)
+            [max(thr_ratio - 1e-6, 0.0), "#fca5a5"], # Light red just before threshold
+            [thr_ratio, "#16a34a"],                  # Green exactly at threshold
+            [1.0, "#16a34a"],                        # Green above threshold
+        ]
 
     # 4. DRAW CHART
     fig = px.imshow(
@@ -523,16 +524,12 @@ def render(p, t, scoring):
         coloraxis_showscale=False,
         margin=dict(l=0, r=0, t=40, b=0)
     )
-    st.caption(t("legend"))
     st.plotly_chart(fig, width='stretch')
-    st.caption(
-    "A cell marked with ★ is a point where a simplified PEQ-style threshold "
-    "(≥24 months of Quebec work + French oral level ≥7) would be met. "
-    "PEQ is currently closed; this marker is for historical comparison only."
-    )
+    st.caption(t("legend"))
+    st.caption(t("peq_tip"))
 
         # --- 5. STRATEGY & TIMING ANALYSIS ---
-    st.markdown("### ⏳ Strategic Timing & Analysis")
+    st.markdown(t("strategy_timing"))
 
     # ---------------------------------------------------------
     # 0. INITIALIZE DATA
@@ -581,45 +578,39 @@ def render(p, t, scoring):
     # ---------------------------------------------------------
     col_peak, col_action = st.columns(2)
     with col_peak:
-        st.success(f"**📈 Your Peak Score: {max_score_val}**")
-        st.write(f"This occurs in **{months_to_peak} months** ({peak_date_str}).")
+        st.success(t("peak_score").format(score=max_score_val))
+        st.write(t("peak_score_occurs").format(months=months_to_peak, date=peak_date_str))
+        # st.write(f"This occurs in **{months_to_peak} months** ({peak_date_str}).")
     with col_action:
         import pandas as pd
         today = pd.Timestamp.now()
         if isinstance(months_to_peak, (int, float)) and months_to_peak > 3:
             deadline = today + pd.DateOffset(months=months_to_peak - 3)
-            st.info(f"**📝 Language Test Deadline: {deadline.strftime('%b %Y')}**")
+            st.info(t("lang_test_deadline_label").format(date=deadline.strftime('%b %Y')))
         else:
-            st.info("**📝 Language Test Deadline: ASAP**")
+            st.info(t("lang_test_deadline_asap"))
 
     if vjo_will_expire:
-        st.error("⚠️ **Warning:** Your peak score is in >18 months. You will need to renew your VJO.")
+        st.error(t("vjo_renewal_warning"))
 
     st.divider()
 
 
     # --- 5. EXPLANATION FORMULA ---
-    st.markdown("### 📐 How is this calculated?")
+    st.markdown(t("calc_section_title"))
 
-    st.markdown(r"""
-    The simulation recalculates your official score for **every single square** in the grid.
-    It assumes you continue working in your current role:
+    # st.markdown(r"""
+    # The simulation recalculates your official score for **every single square** in the grid.
+    # It assumes you continue working in your current role:
 
-    $$
-    \text{Future Score} = \text{Current Profile} + \underbrace{\text{Tenure Gain}}_{\color{green}{\text{Points } \uparrow}} - \underbrace{\text{Age Decay}}_{\color{red}{\text{Points } \downarrow}} + \underbrace{\text{Target French}}_{\color{blue}{\text{New Skill Level}}}
-    $$
-    """)
+    # $$
+    # \text{Future Score} = \text{Current Profile} + \underbrace{\text{Tenure Gain}}_{\color{green}{\text{Points } \uparrow}} - \underbrace{\text{Age Decay}}_{\color{red}{\text{Points } \downarrow}} + \underbrace{\text{Target French}}_{\color{blue}{\text{New Skill Level}}}
+    # $$
+    # """)
+    st.markdown(t("calc_section_body"))
 
-    with st.expander("ℹ️ Click to see exactly what changes"):
-        st.markdown(f"""
-        1.  **Start:** We take your current profile (Age: **{age_val}**, Experience: **{exp_val}** months).
-        2.  **Apply Time Travel:** For every month passed on the axis, we update:
-            * ✅ **General & Quebec Experience:** You gain 1 month of experience.
-            * ✅ **Shortage Job Tenure:** Your primary occupation tenure increases (re-calculating shortage points).
-            * ✅ **Spouse Experience:** Your spouse gains 1 month of Quebec experience (if applicable).
-            * ⚠️ **Age Decay (You & Spouse):** We calculate if you (or your spouse) cross a birthday threshold and deduct points accordingly.
-        3.  **Apply Language Target:** We **replace** your current French test results with the level selected on the axis.
-        """)
+    with st.expander(t("calc_expander_title")):
+        st.markdown(t("calc_section_expander"))
 
 
 
