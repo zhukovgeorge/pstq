@@ -3,11 +3,56 @@ import translations as tr
 # --- CONSTANTS (The "Grid") ---
 
 LATEST_DRAWS = [
-    {"Date": "2025-08-25", "Stream": "Stream 1 (Highly qualified and specialized skills)", "Score": 768, "Invited": 216},
-    {"Date": "2025-08-14", "Stream": "Stream 3 (Regulated professions)", "Score": 766, "Invited": 275},
-    {"Date": "2025-07-31", "Stream": "Stream 2 (Intermediate and manual skills)", "Score": 661, "Invited": 273},
-    {"Date": "2025-07-28", "Stream": "Stream 1 (Highly qualified and specialized skills)", "Score": 760, "Invited": 227},
+    {"Date": "2025-12-04", "Stream": "Stream 1 (Highly qualified and specialized skills)",
+     "Score": 781, "Invited": 605,
+     "Notes": "Québec diploma; FEER 0–2; non-regulated; Québec-wide"},
+    {"Date": "2025-12-04", "Stream": "Stream 1 (Highly qualified and specialized skills)",
+     "Score": 644, "Invited": 605,
+     "Notes": "Manufacturing & food processing; FEER 0–2; outside Montréal Metropolitan Community"},
+
+    {"Date": "2025-12-04", "Stream": "Stream 2 (Intermediate and manual skills)",
+     "Score": 612, "Invited": 604,
+     "Notes": "Priority sectors (health & construction); FEER 3–5; Québec-wide"},
+    {"Date": "2025-12-04", "Stream": "Stream 2 (Intermediate and manual skills)",
+     "Score": 573, "Invited": 604,
+     "Notes": "Manufacturing & food processing; FEER 3–5; outside Montréal Metropolitan Community"},
+
+    {"Date": "2025-12-04", "Stream": "Stream 3 (Regulated professions)",
+     "Score": 717, "Invited": 649,
+     "Notes": "Regulated professions; FEER 0–2; priority sectors; Québec residence"},
+    {"Date": "2025-12-04", "Stream": "Stream 3 (Regulated professions)",
+     "Score": 535, "Invited": 649,
+     "Notes": "Regulated professions; FEER 3–5; construction & trades; Québec residence"},
+
+    {"Date": "2025-08-28", "Stream": "Stream 1 (Highly qualified and specialized skills)",
+     "Score": 760, "Invited": 227,
+     "Notes": "Standard Stream 1 selection"},
+    {"Date": "2025-08-14", "Stream": "Stream 3 (Regulated professions)",
+     "Score": 766, "Invited": 277,
+     "Notes": "Standard Stream 3 selection"},
+    {"Date": "2025-07-31", "Stream": "Stream 2 (Intermediate and manual skills)",
+     "Score": 661, "Invited": 273,
+     "Notes": "Standard Stream 2 selection"},
+    {"Date": "2025-07-17", "Stream": "Stream 1 (Highly qualified and specialized skills)",
+     "Score": 768, "Invited": 216,
+     "Notes": "Standard Stream 1 selection"},
+
+    # Stream 4 – Exceptional talent (no points cutoff)
+    {"Date": "2025-07-17", "Stream": "Stream 4 (Exceptional talent)",
+     "Score": None, "Invited": 22,
+     "Notes": "Partner positive opinion in targeted field OR exceptional achievement document; doctorate; 36 months experience in last 5 years"},
+    {"Date": "2025-08-25", "Stream": "Stream 4 (Exceptional talent)",
+     "Score": None, "Invited": 21,
+     "Notes": "Exceptional achievement document; doctorate; 36 months experience in last 5 years"},
+    {"Date": "2025-12-04", "Stream": "Stream 4 (Exceptional talent)",
+     "Score": None, "Invited": 12,
+     "Notes": "Partner positive opinion in targeted field OR exceptional achievement document; doctorate-equivalent; 36 months experience in last 5 years"},
 ]
+
+
+
+
+
 
 DIAG_MATRIX = {
     "None": [(0, 12, 0), (12, 24, 5), (24, 36, 10), (36, 48, 15), (48, 10**9, 25)],

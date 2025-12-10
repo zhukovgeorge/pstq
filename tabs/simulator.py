@@ -3,6 +3,10 @@ import pandas as pd
 import plotly.express as px
 import urllib.parse
 import translations as tr
+from tabs.draws import compute_avg_score
+import logic.scoring as scoring
+
+AVG_SCORE = int(round(compute_avg_score(scoring.LATEST_DRAWS)))
 
 def generate_scoring_cheat_sheet(scoring, has_spouse):
     """
@@ -105,21 +109,29 @@ def render(p, t, scoring):
 
     # --- 1. TARGET SELECTION ---
     st.subheader(t("step1"))
-    draw_options = [t("manual")] + [f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" for d in scoring.LATEST_DRAWS]
+
+    def _draw_label(d: dict) -> str:
+        return f"{d['Date']} - {d['Stream']} ({d['Score']} pts)"
+
+    # Only include draws that actually have a numeric score (exclude Stream 4)
+    score_draws = [d for d in scoring.LATEST_DRAWS if d["Score"] is not None]
+
+    draw_options = [t("manual")] + [_draw_label(d) for d in score_draws]
 
     c_sel, c_score = st.columns([3, 1])
     target_selection = c_sel.selectbox(t("select_draw"), draw_options, index=0)
 
-    target_score = 600
+    target_score = AVG_SCORE
     target_stream_name = "Manual Target"
 
     if target_selection == t("manual"):
-        target_score = c_score.number_input("Target Score", 500, 900, 600)
+        target_score = c_score.number_input("Target Score", 500, 900, AVG_SCORE)
     else:
-        for d in scoring.LATEST_DRAWS:
-            if f"{d['Date']} - {d['Stream']} ({d['Score']} pts)" == target_selection:
-                target_score = d['Score']
-                target_stream_name = d['Stream']
+        # find the selected draw among score_draws only
+        for d in score_draws:
+            if _draw_label(d) == target_selection:
+                target_score = d["Score"]
+                target_stream_name = d["Stream"]
                 break
 
         color = "#16a34a"
