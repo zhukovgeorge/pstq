@@ -240,15 +240,61 @@ TEXTS = {
         ),
         "target_score_label": "Target Score:",
 
-
-
-
-
         # Draws Tab
         "draws_title": "📢 Recent Invitation Rounds",
         "draws_sub": "Use these values to understand the cutoff scores for different streams.",
         "tip": "💡 **Tip:** Go to the 'Strategy Simulator' tab and select one of these rounds to visualize exactly what you need to do to reach the Green Zone.",
         "stream_def": "ℹ️ Stream Definitions",
+        "total_invited": "Total invited (PSTQ Streams 1–4)",
+        "stream1_label": "Stream 1 (Highly qualified and specialized skills)",
+        "stream2_label": "Stream 2 (Intermediate and manual skills)",
+        "stream3_label": "Stream 3 (Regulated professions)",
+        "stream4_label": "Stream 4 (Exceptional talent)",
+        "notes_stream1_diploma": "Québec diploma; FEER 0–2; non-regulated; Québec-wide",
+        "notes_stream1_manufacturing": "Manufacturing & food processing; FEER 0–2; outside Montréal Metropolitan Community",
+        "notes_stream2_priority": "Priority sectors (health & construction); FEER 3–5; Québec-wide",
+        "notes_stream2_manufacturing": "Manufacturing & food processing; FEER 3–5; outside Montréal Metropolitan Community",
+        "notes_stream3_priority": "Regulated professions; FEER 0–2; priority sectors; Québec residence",
+        "notes_stream3_construction": "Regulated professions; FEER 3–5; construction & trades; Québec residence",
+        "notes_stream1_std": "Standard Stream 1 selection",
+        "notes_stream2_std": "Standard Stream 2 selection",
+        "notes_stream3_std": "Standard Stream 3 selection",
+        "notes_stream4_partner": "Partner positive opinion in targeted field OR exceptional achievement document; doctorate; 36 months experience in last 5 years",
+        "notes_stream4_exceptional": "Exceptional achievement document; doctorate; 36 months experience in last 5 years",
+        "notes_stream4_doctorate_equiv": "Partner positive opinion in targeted field OR exceptional achievement document; doctorate-equivalent; 36 months experience in last 5 years",
+        "plan_2026_metric_label": "Estimated places remaining (Plan 2026 – Skilled workers)",
+        "plan_2026_metric_help": (
+            "Based on Québec’s 2026 immigration plan for skilled workers "
+            "({min}–{max}). PSTQ selections made in 2025 are assumed to "
+            "contribute primarily to 2026 admissions. This comparison is indicative."
+        ),
+        "plan_2026_caption": (
+            "Current selections ≈ {pct_min}–{pct_max}% of the 2026 "
+            "Skilled workers plan."
+        ),
+
+        "draws_table_caption": (
+            "Each row is a published score cutoff within a draw. For Stream 4 "
+            "(Exceptional talent), no score cutoff is published. “Invited” is the "
+            "total invitations for that date and stream. The quota comparison is a "
+            "forward-looking estimate against the 2026 skilled workers admission plan."
+        ),
+
+        "draws_ref_title": "References and sources",
+        "draws_ref_body": (
+            "- [Immigration Plan 2026 – MIFI (official PDF)]"
+            "(https://cdn-contenu.quebec.ca/cdn-contenu/adm/min/immigration/"
+            "publications-adm/plan-immigration/PL_immigration_2026_MIFI.pdf)\n"
+            "- [PSTQ Invitations in Arrima – Skilled Workers Selection Program (2025)]"
+            "(https://www.quebec.ca/immigration/permanente/travailleurs-qualifies/"
+            "programme-selection-travailleurs-qualifies/invitation/2025)"
+        ),
+
+
+
+
+
+
 
         # --- TOOLTIPS (EXPLANATIONS) ---
         "tip_age": "Points are maximized between ages 18-30 and decrease progressively until age 45.",
@@ -521,6 +567,52 @@ TEXTS = {
         "draws_sub": "Utilisez ces valeurs pour comprendre les scores de coupure.",
         "tip": "💡 **Astuce:** Allez dans l'onglet 'Simulateur' et sélectionnez une de ces rondes pour visualiser comment atteindre la Zone Verte.",
         "stream_def": "ℹ️ Définitions des Volets",
+        "total_invited": "Total des invités (Volet PSTQ 1 à 4)",
+        "average_cutoff": "Score moyen requis (filières 1 à 3)",
+        "stream1_label": "Volet 1 : Haute qualification et compétences spécialisées",
+        "stream2_label": "Volet 2 : Compétences intermédiaires et manuelles",
+        "stream3_label": "Volet 3 : Professions réglementées",
+        "stream4_label": "Volet 4 : Talents d’exception",
+        "notes_stream1_diploma": "Diplôme du Québec; FEER 0–2; non réglementé; partout au Québec",
+        "notes_stream1_manufacturing": "Fabrication & transformation alimentaire; FEER 0–2; hors Communauté métropolitaine de Montréal",
+        "notes_stream2_priority": "Secteurs prioritaires (santé & construction); FEER 3–5; partout au Québec",
+        "notes_stream2_manufacturing": "Fabrication & transformation alimentaire; FEER 3–5; hors Communauté métropolitaine de Montréal",
+        "notes_stream3_priority": "Professions réglementées; FEER 0–2; secteurs prioritaires; résidence au Québec",
+        "notes_stream3_construction": "Professions réglementées; FEER 3–5; construction & métiers; résidence au Québec",
+        "notes_stream1_std": "Sélection standard Volet 1",
+        "notes_stream2_std": "Sélection standard Volet 2",
+        "notes_stream3_std": "Sélection standard Volet 3",
+        "notes_stream4_partner": "Avis positif d’un partenaire dans un domaine ciblé OU document d’accomplissement exceptionnel; doctorat; 36 mois d’expérience dans les 5 dernières années",
+        "notes_stream4_exceptional": "Document d’accomplissement exceptionnel; doctorat; 36 mois d’expérience dans les 5 dernières années",
+        "notes_stream4_doctorate_equiv": "Avis positif d’un partenaire dans un domaine ciblé OU document d’accomplissement exceptionnel; équivalent doctorat; 36 mois d’expérience dans les 5 dernières années",
+        "plan_2026_metric_label": "Places estimées restantes (Plan 2026 – Travailleurs qualifiés)",
+        "plan_2026_metric_help": (
+            "Basé sur le Plan d’immigration 2026 du Québec pour les travailleurs qualifiés "
+            "({min}–{max}). Les sélections PSTQ effectuées en 2025 sont supposées contribuer "
+            "principalement aux admissions de 2026. Cette comparaison est indicative."
+        ),
+        "plan_2026_caption": (
+            "Sélections actuelles ≈ {pct_min}–{pct_max}% du plan 2026 "
+            "des travailleurs qualifiés."
+        ),
+
+        "draws_table_caption": (
+            "Chaque ligne correspond à un seuil de score publié pour un tirage. Pour le Volet 4 "
+            "(Talents d’exception), aucun seuil de score n’est publié. « Invitée(s) » indique le "
+            "nombre total d’invitations pour cette date et ce volet. La comparaison au quota est "
+            "une estimation projetée par rapport au plan d’admissions 2026 des travailleurs qualifiés."
+        ),
+
+        "draws_ref_title": "Références et sources",
+        "draws_ref_body": (
+            "- [Plan d’immigration 2026 – MIFI (PDF officiel)]"
+            "(https://cdn-contenu.quebec.ca/cdn-contenu/adm/min/immigration/"
+            "publications-adm/plan-immigration/PL_immigration_2026_MIFI.pdf)\n"
+            "- [Invitations dans Arrima du Programme de sélection des travailleurs qualifiés (2025)]"
+            "(https://www.quebec.ca/immigration/permanente/travailleurs-qualifies/"
+            "programme-selection-travailleurs-qualifies/invitation/2025)"
+        ),
+
 
         # --- TOOLTIPS (EXPLANATIONS) ---
         "tip_age": "Les points sont maximisés entre 18 et 30 ans et diminuent progressivement jusqu'à 45 ans.",
