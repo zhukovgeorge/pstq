@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 def render(t):
-    st.header("📬 Contact & Feedback")
+    st.header(t("contact_title"))
 
     st.markdown("""
     **Aidez-nous à améliorer cet outil.**

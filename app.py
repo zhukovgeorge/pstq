@@ -177,9 +177,32 @@ with t6: reference.render(t, scoring, tr)
 with t7: contact.render(t)
 
 # ==========================================
-# 4. GLOBAL FOOTER (LEGAL DISCLAIMER)
+# 4. GLOBAL FOOTER (SUPPORT + DISCLAIMER)
 # ==========================================
 st.divider()
+
+# --- Buy me a coffee button ---
+support_label = "☕ Buy me a coffee" if st.session_state.lang == "en" else "☕ Offrez-moi un café"
+st.markdown(
+    f"""
+    <div style='text-align: center; margin-bottom: 10px;'>
+        <a href="https://buymeacoffee.com/pstqsimulator" target="_blank" style="text-decoration: none;">
+            <button style="
+                background-color:#FFDD00;
+                border:none;
+                border-radius:6px;
+                padding:8px 16px;
+                font-weight:600;
+                cursor:pointer;
+                color:#000000;
+            ">
+                {support_label}
+            </button>
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # You can manually update this date whenever you change the scoring logic
 last_update_date = datetime.today().strftime('%Y-%m-%d')

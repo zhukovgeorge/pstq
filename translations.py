@@ -390,8 +390,8 @@ TEXTS = {
         "ref_sources_title": "References and Sources",
         "ref_sources_pstq_link_label": "Official PSTQ Scoring Grid (MIFI)",
 
-
-
+        # Contact
+        "contact_title": "📬 Contact & Feedback",
     },
 
     "fr": {
@@ -661,6 +661,9 @@ TEXTS = {
 
         "ref_sources_title": "Références et sources",
         "ref_sources_pstq_link_label": "Grille officielle de pointage du PSTQ (MIFI)",
+
+        # Contact
+        "contact_title": "📬 Contact et commentaires",
 
     }
 }
