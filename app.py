@@ -182,7 +182,7 @@ with t7: contact.render(t)
 st.divider()
 
 # --- Buy me a coffee button ---
-support_label = "☕ Buy me a coffee" if st.session_state.lang == "en" else "☕ Offrez-moi un café"
+support_label = "☕ Buy me a coffee to support this site" if st.session_state.lang == "en" else "☕ Offrez-moi un café pour soutenir ce site"
 st.markdown(
     f"""
     <div style='text-align: center; margin-bottom: 10px;'>
