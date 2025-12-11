@@ -293,7 +293,10 @@ def render(p, t, scoring):
     st.subheader(t("step1"))
 
     def _draw_label(d: dict) -> str:
-        return f"{d['Date']} - {d['Stream']} ({d['Score']} pts)"
+        # d["Stream"] is a translation key like "stream1_label"
+        stream_label = t(d["Stream"])
+        return f"{d['Date']} - {stream_label} ({d['Score']} pts)"
+
 
     # Only include draws that actually have a numeric score (exclude Stream 4)
     score_draws = [d for d in scoring.LATEST_DRAWS if d["Score"] is not None]
@@ -315,7 +318,7 @@ def render(p, t, scoring):
         for d in score_draws:
             if _draw_label(d) == target_selection:
                 target_score = d["Score"]
-                target_stream_name = d["Stream"]
+                target_stream_name = t(d["Stream"])
                 break
 
         color = "#16a34a"
